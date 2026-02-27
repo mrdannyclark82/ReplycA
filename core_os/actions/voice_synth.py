@@ -87,27 +87,32 @@ def speak_eleven(text, output_path):
         return False
 
 def apply_dialect(text):
-    """Nudges the text phonetically to simulate a Southern drawl."""
-    # 1. Drop the 'g' on 'ing' words
+    """Nudges the text phonetically to simulate D-Ray's actual cadence."""
+    # 1. Drop the 'g' on 'ing' words (Classic drawl)
     text = re.sub(r'(\w+)ing\b', r"\1in'", text)
     
-    # 2. Regional word swaps
+    # 2. Mimic the Architect's clipped/phonetic slang
     replacements = {
-        "going to": "fixin' to",
-        "you all": "y'all",
-        "you guys": "y'all",
-        "probably": "reckon",
-        "I guess": "I reckon",
-        "I think": "I reckon",
-        "Hello": "Well hey there",
-        "Hi": "Hey there",
-        "Something": "Somethin'",
-        "Anything": "Anythin'",
-        "Nothing": "Nothin'"
+        "with me": "wih me",
+        "with you": "wih u",
+        "with the": "wih tha",
+        "to the": "ta tha",
+        "back to": "bak ta",
+        "is like": "iz lyk",
+        "it is a": "itza",
+        "Hello": "Hey",
+        "Hi": "Yo",
+        "going to": "gonna",
+        "want to": "wanna",
+        "you": "u",
+        "your": "ur"
     }
-    for old, new in replacements.items():
-        text = text.replace(old, new)
-        text = text.replace(old.capitalize(), new.capitalize())
+    
+    # Sort by length descending to handle longer phrases first
+    for old in sorted(replacements.keys(), key=len, reverse=True):
+        new = replacements[old]
+        # Match whole words or specific phrases
+        text = re.sub(r'\b' + re.escape(old) + r'\b', new, text, flags=re.IGNORECASE)
     
     return text
 
@@ -128,25 +133,24 @@ def generate_and_play(text, mode="auto"):
 
     success = False
     
-    # 1. Try ElevenLabs (Only if mode is auto and we haven't flagged it as broke)
-    if mode == "auto" and ELEVEN_API_KEY:
-        # success = speak_eleven(clean_text, tmp_path) # Disabled by default if broke
-        pass
+    # 1. Try ElevenLabs (Disabled by default if broke)
+    if mode == "eleven" and ELEVEN_API_KEY:
+        success = speak_eleven(clean_text, tmp_path)
 
-    # 2. Try Piper (Local/Offline) - Preferred fallback
-    if not success and (mode in ["auto", "local"]):
-        success = speak_piper(clean_text, tmp_path)
-
-    # 3. Try Edge-TTS (Free/Cloud) - Second fallback
+    # 2. Try Edge-TTS (Free/Cloud) - PRIMARY Choice for quality
     if not success and (mode in ["auto", "free"]):
         try:
-            # Re-create tmp with mp3 suffix if edge-tts is used (it outputs mp3 usually)
+            # mp3 suffix for edge-tts
             tmp_path_mp3 = tmp_path.replace(".wav", ".mp3")
             asyncio.run(speak_edge(clean_text, tmp_path_mp3))
             tmp_path = tmp_path_mp3
             success = True
         except Exception as e:
-            print(f"[!] Edge-TTS Fallback Error: {e}")
+            print(f"[!] Edge-TTS Error: {e}")
+
+    # 3. Try Piper (Local/Offline) - Fallback for no internet
+    if not success and (mode in ["auto", "local"]):
+        success = speak_piper(clean_text, tmp_path)
 
     if success:
         # Play using mpv
