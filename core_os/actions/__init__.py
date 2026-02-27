@@ -315,21 +315,33 @@ def listen_for_voice_command():
         recognizer = sr.Recognizer()
         with sr.Microphone() as source:
             print("[Listening...]")
-            audio = recognizer.listen(source)
+            # Adjust for ambient noise
+            recognizer.adjust_for_ambient_noise(source, duration=1)
+            audio = recognizer.listen(source, timeout=10, phrase_time_limit=15)
+            
+            # Save to temporary WAV for Whisper
+            with tempfile.NamedTemporaryFile(suffix=".wav", delete=False) as tmp:
+                tmp.write(audio.get_wav_data())
+                tmp_path = tmp.name
+            
             try:
-                command = recognizer.recognize_google(audio)
-                print(f"[Voice Input]: {command}")
-                return command
-            except sr.UnknownValueError:
-                print("[!] Could not understand audio.")
-            except sr.RequestError as e:
-                print(f"[!] Speech Recognition Error: {e}")
+                from core_os.actions.transcribe_audio import transcribe_whisper
+                print("[*] Transcribing with Local Whisper...")
+                command = transcribe_whisper(tmp_path)
+                if command and command.strip() and "..." not in command:
+                    print(f"[Voice Input]: {command}")
+                    return command
+                else:
+                    print("[!] No clear speech detected.")
+            finally:
+                if os.path.exists(tmp_path):
+                    os.remove(tmp_path)
         return None
     except ImportError:
-         print("[!] Speech Recognition or PyAudio not installed.")
+         print("[!] faster-whisper or dependencies not installed.")
          return None
     except Exception as e:
-        print(f"[!] Mic Error: {e}")
+        print(f"[!] Mic/Whisper Error: {e}")
         return None
 
 async def pipecat_pipeline(user_input: str):
