@@ -36,10 +36,28 @@ r = redis.Redis(host='localhost', port=6379, db=0)
 checkpoint_counter = 0
 
 def get_weather():
+    CACHE_FILE = "core_os/memory/weather_cache.json"
+    CACHE_DURATION = 28800 # 8 hours (3 times a day)
+    
+    # Check Cache
+    if os.path.exists(CACHE_FILE):
+        try:
+            with open(CACHE_FILE, 'r') as f:
+                cache = json.load(f)
+            if time.time() - cache.get('timestamp', 0) < CACHE_DURATION:
+                return cache.get('weather', "Unknown")
+        except: pass
+
     try:
         # Architect lives in Judsonia
         result = subprocess.run(["curl", "-s", "https://wttr.in/Judsonia?format=%C+%t"], capture_output=True, text=True)
-        return result.stdout.strip()
+        weather = result.stdout.strip()
+        
+        # Save Cache
+        with open(CACHE_FILE, 'w') as f:
+            json.dump({"weather": weather, "timestamp": time.time()}, f)
+            
+        return weather
     except:
         return "Unknown"
 
