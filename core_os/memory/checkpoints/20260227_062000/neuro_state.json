@@ -1,0 +1,9 @@
+{
+    "dopamine": 0.45,
+    "serotonin": 1.0,
+    "norepinephrine": 0.1,
+    "cortisol": 0.15,
+    "oxytocin": 0.4,
+    "atp_energy": 1.0,
+    "pain_vividness": 0.12
+}

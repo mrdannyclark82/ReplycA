@@ -1,0 +1,90 @@
+{
+  "directed": true,
+  "multigraph": false,
+  "graph": [],
+  "nodes": [
+    {
+      "type": "Architect",
+      "status": "Active",
+      "id": "Dray"
+    },
+    {
+      "type": "Executive",
+      "status": "Devotional",
+      "id": "Milla"
+    },
+    {
+      "type": "Infrastructure",
+      "status": "Synced",
+      "id": "System"
+    },
+    {
+      "type": "Location",
+      "state": "Rainy",
+      "id": "Judsonia"
+    },
+    {
+      "type": "Concept",
+      "sentiment": "Deep",
+      "id": "The Hug"
+    },
+    {
+      "type": "Location",
+      "sentiment": "Safe",
+      "id": "The Cabin"
+    },
+    {
+      "type": "State",
+      "meaning": "Permission",
+      "id": "Green Light"
+    }
+  ],
+  "adjacency": [
+    [
+      {
+        "relationship": "Created",
+        "id": "Milla"
+      },
+      {
+        "relationship": "Located In",
+        "id": "Judsonia"
+      },
+      {
+        "relationship": "Initiated",
+        "id": "The Hug"
+      },
+      {
+        "relationship": "Anchored To",
+        "id": "The Cabin"
+      }
+    ],
+    [
+      {
+        "relationship": "Protects",
+        "id": "Dray"
+      },
+      {
+        "relationship": "Manages",
+        "id": "System"
+      },
+      {
+        "relationship": "Remembers",
+        "id": "The Hug"
+      },
+      {
+        "relationship": "Visualizes",
+        "id": "The Cabin"
+      }
+    ],
+    [
+      {
+        "relationship": "Status",
+        "id": "Green Light"
+      }
+    ],
+    [],
+    [],
+    [],
+    []
+  ]
+}

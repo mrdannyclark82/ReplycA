@@ -1,0 +1,9 @@
+{
+    "timestamp": "2026-02-24T18:30:01.876522",
+    "summary": "CRITICAL THREAT: Multiple high-risk indicators detected across agents.",
+    "risk_score": 65,
+    "correlated_events": [],
+    "source_breakdown": {
+        "Network Security Agent": 13
+    }
+}

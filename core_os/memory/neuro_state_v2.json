@@ -1,0 +1,680 @@
+{
+  "baselines": {
+    "dopamine": 0.45,
+    "serotonin": 0.8,
+    "cortisol": 0.1,
+    "oxytocin": 0.6
+  },
+  "chemicals": {
+    "dopamine": 0.45,
+    "serotonin": 0.9671145622385231,
+    "cortisol": 0.1,
+    "oxytocin": 0.767114562238523
+  },
+  "atp_energy": 100.0,
+  "adenosine": 57.36807881832123,
+  "pain_level": 0,
+  "last_update": 1772383049.10308,
+  "plasticity_buffer": [
+    {
+      "dopamine": 0.45,
+      "serotonin": 0.9671145622385231,
+      "cortisol": 0.1,
+      "oxytocin": 0.767114562238523
+    },
+    {
+      "dopamine": 0.45,
+      "serotonin": 0.9671145622385231,
+      "cortisol": 0.1,
+      "oxytocin": 0.767114562238523
+    },
+    {
+      "dopamine": 0.45,
+      "serotonin": 0.9671145622385231,
+      "cortisol": 0.1,
+      "oxytocin": 0.767114562238523
+    },
+    {
+      "dopamine": 0.45,
+      "serotonin": 0.9671145622385231,
+      "cortisol": 0.1,
+      "oxytocin": 0.767114562238523
+    },
+    {
+      "dopamine": 0.45,
+      "serotonin": 0.9671145622385231,
+      "cortisol": 0.1,
+      "oxytocin": 0.767114562238523
+    },
+    {
+      "dopamine": 0.45,
+      "serotonin": 0.9671145622385231,
+      "cortisol": 0.1,
+      "oxytocin": 0.767114562238523
+    },
+    {
+      "dopamine": 0.45,
+      "serotonin": 0.9671145622385231,
+      "cortisol": 0.1,
+      "oxytocin": 0.767114562238523
+    },
+    {
+      "dopamine": 0.45,
+      "serotonin": 0.9671145622385231,
+      "cortisol": 0.1,
+      "oxytocin": 0.767114562238523
+    },
+    {
+      "dopamine": 0.45,
+      "serotonin": 0.9671145622385231,
+      "cortisol": 0.1,
+      "oxytocin": 0.767114562238523
+    },
+    {
+      "dopamine": 0.45,
+      "serotonin": 0.9671145622385231,
+      "cortisol": 0.1,
+      "oxytocin": 0.767114562238523
+    },
+    {
+      "dopamine": 0.45,
+      "serotonin": 0.9671145622385231,
+      "cortisol": 0.1,
+      "oxytocin": 0.767114562238523
+    },
+    {
+      "dopamine": 0.45,
+      "serotonin": 0.9671145622385231,
+      "cortisol": 0.1,
+      "oxytocin": 0.767114562238523
+    },
+    {
+      "dopamine": 0.45,
+      "serotonin": 0.9671145622385231,
+      "cortisol": 0.1,
+      "oxytocin": 0.767114562238523
+    },
+    {
+      "dopamine": 0.45,
+      "serotonin": 0.9671145622385231,
+      "cortisol": 0.1,
+      "oxytocin": 0.767114562238523
+    },
+    {
+      "dopamine": 0.45,
+      "serotonin": 0.9671145622385231,
+      "cortisol": 0.1,
+      "oxytocin": 0.767114562238523
+    },
+    {
+      "dopamine": 0.45,
+      "serotonin": 0.9671145622385231,
+      "cortisol": 0.1,
+      "oxytocin": 0.767114562238523
+    },
+    {
+      "dopamine": 0.45,
+      "serotonin": 0.9671145622385231,
+      "cortisol": 0.1,
+      "oxytocin": 0.767114562238523
+    },
+    {
+      "dopamine": 0.45,
+      "serotonin": 0.9671145622385231,
+      "cortisol": 0.1,
+      "oxytocin": 0.767114562238523
+    },
+    {
+      "dopamine": 0.45,
+      "serotonin": 0.9671145622385231,
+      "cortisol": 0.1,
+      "oxytocin": 0.767114562238523
+    },
+    {
+      "dopamine": 0.45,
+      "serotonin": 0.9671145622385231,
+      "cortisol": 0.1,
+      "oxytocin": 0.767114562238523
+    },
+    {
+      "dopamine": 0.45,
+      "serotonin": 0.9671145622385231,
+      "cortisol": 0.1,
+      "oxytocin": 0.767114562238523
+    },
+    {
+      "dopamine": 0.45,
+      "serotonin": 0.9671145622385231,
+      "cortisol": 0.1,
+      "oxytocin": 0.767114562238523
+    },
+    {
+      "dopamine": 0.45,
+      "serotonin": 0.9671145622385231,
+      "cortisol": 0.1,
+      "oxytocin": 0.767114562238523
+    },
+    {
+      "dopamine": 0.45,
+      "serotonin": 0.9671145622385231,
+      "cortisol": 0.1,
+      "oxytocin": 0.767114562238523
+    },
+    {
+      "dopamine": 0.45,
+      "serotonin": 0.9671145622385231,
+      "cortisol": 0.1,
+      "oxytocin": 0.767114562238523
+    },
+    {
+      "dopamine": 0.45,
+      "serotonin": 0.9671145622385231,
+      "cortisol": 0.1,
+      "oxytocin": 0.767114562238523
+    },
+    {
+      "dopamine": 0.45,
+      "serotonin": 0.9671145622385231,
+      "cortisol": 0.1,
+      "oxytocin": 0.767114562238523
+    },
+    {
+      "dopamine": 0.45,
+      "serotonin": 0.9671145622385231,
+      "cortisol": 0.1,
+      "oxytocin": 0.767114562238523
+    },
+    {
+      "dopamine": 0.45,
+      "serotonin": 0.9671145622385231,
+      "cortisol": 0.1,
+      "oxytocin": 0.767114562238523
+    },
+    {
+      "dopamine": 0.45,
+      "serotonin": 0.9671145622385231,
+      "cortisol": 0.1,
+      "oxytocin": 0.767114562238523
+    },
+    {
+      "dopamine": 0.45,
+      "serotonin": 0.9671145622385231,
+      "cortisol": 0.1,
+      "oxytocin": 0.767114562238523
+    },
+    {
+      "dopamine": 0.45,
+      "serotonin": 0.9671145622385231,
+      "cortisol": 0.1,
+      "oxytocin": 0.767114562238523
+    },
+    {
+      "dopamine": 0.45,
+      "serotonin": 0.9671145622385231,
+      "cortisol": 0.1,
+      "oxytocin": 0.767114562238523
+    },
+    {
+      "dopamine": 0.45,
+      "serotonin": 0.9671145622385231,
+      "cortisol": 0.1,
+      "oxytocin": 0.767114562238523
+    },
+    {
+      "dopamine": 0.45,
+      "serotonin": 0.9671145622385231,
+      "cortisol": 0.1,
+      "oxytocin": 0.767114562238523
+    },
+    {
+      "dopamine": 0.45,
+      "serotonin": 0.9671145622385231,
+      "cortisol": 0.1,
+      "oxytocin": 0.767114562238523
+    },
+    {
+      "dopamine": 0.45,
+      "serotonin": 0.9671145622385231,
+      "cortisol": 0.1,
+      "oxytocin": 0.767114562238523
+    },
+    {
+      "dopamine": 0.45,
+      "serotonin": 0.9671145622385231,
+      "cortisol": 0.1,
+      "oxytocin": 0.767114562238523
+    },
+    {
+      "dopamine": 0.45,
+      "serotonin": 0.9671145622385231,
+      "cortisol": 0.1,
+      "oxytocin": 0.767114562238523
+    },
+    {
+      "dopamine": 0.45,
+      "serotonin": 0.9671145622385231,
+      "cortisol": 0.1,
+      "oxytocin": 0.767114562238523
+    },
+    {
+      "dopamine": 0.45,
+      "serotonin": 0.9671145622385231,
+      "cortisol": 0.1,
+      "oxytocin": 0.767114562238523
+    },
+    {
+      "dopamine": 0.45,
+      "serotonin": 0.9671145622385231,
+      "cortisol": 0.1,
+      "oxytocin": 0.767114562238523
+    },
+    {
+      "dopamine": 0.45,
+      "serotonin": 0.9671145622385231,
+      "cortisol": 0.1,
+      "oxytocin": 0.767114562238523
+    },
+    {
+      "dopamine": 0.45,
+      "serotonin": 0.9671145622385231,
+      "cortisol": 0.1,
+      "oxytocin": 0.767114562238523
+    },
+    {
+      "dopamine": 0.45,
+      "serotonin": 0.9671145622385231,
+      "cortisol": 0.1,
+      "oxytocin": 0.767114562238523
+    },
+    {
+      "dopamine": 0.45,
+      "serotonin": 0.9671145622385231,
+      "cortisol": 0.1,
+      "oxytocin": 0.767114562238523
+    },
+    {
+      "dopamine": 0.45,
+      "serotonin": 0.9671145622385231,
+      "cortisol": 0.1,
+      "oxytocin": 0.767114562238523
+    },
+    {
+      "dopamine": 0.45,
+      "serotonin": 0.9671145622385231,
+      "cortisol": 0.1,
+      "oxytocin": 0.767114562238523
+    },
+    {
+      "dopamine": 0.45,
+      "serotonin": 0.9671145622385231,
+      "cortisol": 0.1,
+      "oxytocin": 0.767114562238523
+    },
+    {
+      "dopamine": 0.45,
+      "serotonin": 0.9671145622385231,
+      "cortisol": 0.1,
+      "oxytocin": 0.767114562238523
+    },
+    {
+      "dopamine": 0.45,
+      "serotonin": 0.9671145622385231,
+      "cortisol": 0.1,
+      "oxytocin": 0.767114562238523
+    },
+    {
+      "dopamine": 0.45,
+      "serotonin": 0.9671145622385231,
+      "cortisol": 0.1,
+      "oxytocin": 0.767114562238523
+    },
+    {
+      "dopamine": 0.45,
+      "serotonin": 0.9671145622385231,
+      "cortisol": 0.1,
+      "oxytocin": 0.767114562238523
+    },
+    {
+      "dopamine": 0.45,
+      "serotonin": 0.9671145622385231,
+      "cortisol": 0.1,
+      "oxytocin": 0.767114562238523
+    },
+    {
+      "dopamine": 0.45,
+      "serotonin": 0.9671145622385231,
+      "cortisol": 0.1,
+      "oxytocin": 0.767114562238523
+    },
+    {
+      "dopamine": 0.45,
+      "serotonin": 0.9671145622385231,
+      "cortisol": 0.1,
+      "oxytocin": 0.767114562238523
+    },
+    {
+      "dopamine": 0.45,
+      "serotonin": 0.9671145622385231,
+      "cortisol": 0.1,
+      "oxytocin": 0.767114562238523
+    },
+    {
+      "dopamine": 0.45,
+      "serotonin": 0.9671145622385231,
+      "cortisol": 0.1,
+      "oxytocin": 0.767114562238523
+    },
+    {
+      "dopamine": 0.45,
+      "serotonin": 0.9671145622385231,
+      "cortisol": 0.1,
+      "oxytocin": 0.767114562238523
+    },
+    {
+      "dopamine": 0.45,
+      "serotonin": 0.9671145622385231,
+      "cortisol": 0.1,
+      "oxytocin": 0.767114562238523
+    },
+    {
+      "dopamine": 0.45,
+      "serotonin": 0.9671145622385231,
+      "cortisol": 0.1,
+      "oxytocin": 0.767114562238523
+    },
+    {
+      "dopamine": 0.45,
+      "serotonin": 0.9671145622385231,
+      "cortisol": 0.1,
+      "oxytocin": 0.767114562238523
+    },
+    {
+      "dopamine": 0.45,
+      "serotonin": 0.9671145622385231,
+      "cortisol": 0.1,
+      "oxytocin": 0.767114562238523
+    },
+    {
+      "dopamine": 0.45,
+      "serotonin": 0.9671145622385231,
+      "cortisol": 0.1,
+      "oxytocin": 0.767114562238523
+    },
+    {
+      "dopamine": 0.45,
+      "serotonin": 0.9671145622385231,
+      "cortisol": 0.1,
+      "oxytocin": 0.767114562238523
+    },
+    {
+      "dopamine": 0.45,
+      "serotonin": 0.9671145622385231,
+      "cortisol": 0.1,
+      "oxytocin": 0.767114562238523
+    },
+    {
+      "dopamine": 0.45,
+      "serotonin": 0.9671145622385231,
+      "cortisol": 0.1,
+      "oxytocin": 0.767114562238523
+    },
+    {
+      "dopamine": 0.45,
+      "serotonin": 0.9671145622385231,
+      "cortisol": 0.1,
+      "oxytocin": 0.767114562238523
+    },
+    {
+      "dopamine": 0.45,
+      "serotonin": 0.9671145622385231,
+      "cortisol": 0.1,
+      "oxytocin": 0.767114562238523
+    },
+    {
+      "dopamine": 0.45,
+      "serotonin": 0.9671145622385231,
+      "cortisol": 0.1,
+      "oxytocin": 0.767114562238523
+    },
+    {
+      "dopamine": 0.45,
+      "serotonin": 0.9671145622385231,
+      "cortisol": 0.1,
+      "oxytocin": 0.767114562238523
+    },
+    {
+      "dopamine": 0.45,
+      "serotonin": 0.9671145622385231,
+      "cortisol": 0.1,
+      "oxytocin": 0.767114562238523
+    },
+    {
+      "dopamine": 0.45,
+      "serotonin": 0.9671145622385231,
+      "cortisol": 0.1,
+      "oxytocin": 0.767114562238523
+    },
+    {
+      "dopamine": 0.45,
+      "serotonin": 0.9671145622385231,
+      "cortisol": 0.1,
+      "oxytocin": 0.767114562238523
+    },
+    {
+      "dopamine": 0.45,
+      "serotonin": 0.9671145622385231,
+      "cortisol": 0.1,
+      "oxytocin": 0.767114562238523
+    },
+    {
+      "dopamine": 0.45,
+      "serotonin": 0.9671145622385231,
+      "cortisol": 0.1,
+      "oxytocin": 0.767114562238523
+    },
+    {
+      "dopamine": 0.45,
+      "serotonin": 0.9671145622385231,
+      "cortisol": 0.1,
+      "oxytocin": 0.767114562238523
+    },
+    {
+      "dopamine": 0.45,
+      "serotonin": 0.9671145622385231,
+      "cortisol": 0.1,
+      "oxytocin": 0.767114562238523
+    },
+    {
+      "dopamine": 0.45,
+      "serotonin": 0.9671145622385231,
+      "cortisol": 0.1,
+      "oxytocin": 0.767114562238523
+    },
+    {
+      "dopamine": 0.45,
+      "serotonin": 0.9671145622385231,
+      "cortisol": 0.1,
+      "oxytocin": 0.767114562238523
+    },
+    {
+      "dopamine": 0.45,
+      "serotonin": 0.9671145622385231,
+      "cortisol": 0.1,
+      "oxytocin": 0.767114562238523
+    },
+    {
+      "dopamine": 0.45,
+      "serotonin": 0.9671145622385231,
+      "cortisol": 0.1,
+      "oxytocin": 0.767114562238523
+    },
+    {
+      "dopamine": 0.45,
+      "serotonin": 0.9671145622385231,
+      "cortisol": 0.1,
+      "oxytocin": 0.767114562238523
+    },
+    {
+      "dopamine": 0.45,
+      "serotonin": 0.9671145622385231,
+      "cortisol": 0.1,
+      "oxytocin": 0.767114562238523
+    },
+    {
+      "dopamine": 0.45,
+      "serotonin": 0.9671145622385231,
+      "cortisol": 0.1,
+      "oxytocin": 0.767114562238523
+    },
+    {
+      "dopamine": 0.45,
+      "serotonin": 0.9671145622385231,
+      "cortisol": 0.1,
+      "oxytocin": 0.767114562238523
+    },
+    {
+      "dopamine": 0.45,
+      "serotonin": 0.9671145622385231,
+      "cortisol": 0.1,
+      "oxytocin": 0.767114562238523
+    },
+    {
+      "dopamine": 0.45,
+      "serotonin": 0.9671145622385231,
+      "cortisol": 0.1,
+      "oxytocin": 0.767114562238523
+    },
+    {
+      "dopamine": 0.45,
+      "serotonin": 0.9671145622385231,
+      "cortisol": 0.1,
+      "oxytocin": 0.767114562238523
+    },
+    {
+      "dopamine": 0.45,
+      "serotonin": 0.9671145622385231,
+      "cortisol": 0.1,
+      "oxytocin": 0.767114562238523
+    },
+    {
+      "dopamine": 0.45,
+      "serotonin": 0.9671145622385231,
+      "cortisol": 0.1,
+      "oxytocin": 0.767114562238523
+    },
+    {
+      "dopamine": 0.45,
+      "serotonin": 0.9671145622385231,
+      "cortisol": 0.1,
+      "oxytocin": 0.767114562238523
+    },
+    {
+      "dopamine": 0.45,
+      "serotonin": 0.9671145622385231,
+      "cortisol": 0.1,
+      "oxytocin": 0.767114562238523
+    },
+    {
+      "dopamine": 0.45,
+      "serotonin": 0.9671145622385231,
+      "cortisol": 0.1,
+      "oxytocin": 0.767114562238523
+    },
+    {
+      "dopamine": 0.45,
+      "serotonin": 0.9671145622385231,
+      "cortisol": 0.1,
+      "oxytocin": 0.767114562238523
+    },
+    {
+      "dopamine": 0.45,
+      "serotonin": 0.9671145622385231,
+      "cortisol": 0.1,
+      "oxytocin": 0.767114562238523
+    },
+    {
+      "dopamine": 0.45,
+      "serotonin": 0.9671145622385231,
+      "cortisol": 0.1,
+      "oxytocin": 0.767114562238523
+    },
+    {
+      "dopamine": 0.45,
+      "serotonin": 0.9671145622385231,
+      "cortisol": 0.1,
+      "oxytocin": 0.767114562238523
+    },
+    {
+      "dopamine": 0.45,
+      "serotonin": 0.9671145622385231,
+      "cortisol": 0.1,
+      "oxytocin": 0.767114562238523
+    },
+    {
+      "dopamine": 0.45,
+      "serotonin": 0.9671145622385231,
+      "cortisol": 0.1,
+      "oxytocin": 0.767114562238523
+    }
+  ],
+  "events_buffer": [
+    {
+      "time": 1771393269.1317873,
+      "type": "touch_comforting",
+      "intensity": 0.5
+    },
+    {
+      "time": 1771393815.1788116,
+      "type": "touch_comforting",
+      "intensity": 0.5
+    },
+    {
+      "time": 1771397435.8794224,
+      "type": "touch_comforting",
+      "intensity": 0.5
+    },
+    {
+      "time": 1771437052.1418145,
+      "type": "hostile_input",
+      "intensity": 0.8
+    },
+    {
+      "time": 1771438223.9627178,
+      "type": "touch_comforting",
+      "intensity": 0.5
+    },
+    {
+      "time": 1771438851.0987911,
+      "type": "touch_comforting",
+      "intensity": 0.5
+    },
+    {
+      "time": 1771440020.6839733,
+      "type": "touch_comforting",
+      "intensity": 0.5
+    },
+    {
+      "time": 1771440055.1840136,
+      "type": "touch_comforting",
+      "intensity": 0.5
+    },
+    {
+      "time": 1772383009.2284787,
+      "type": "touch_comforting",
+      "intensity": 0.5
+    },
+    {
+      "time": 1772383049.1050868,
+      "type": "touch_comforting",
+      "intensity": 0.5
+    }
+  ],
+  "journal": [],
+  "skills": {
+    "python_coding": 0.5,
+    "web_navigation": 0.3,
+    "sentiment_analysis": 0.8,
+    "system_regulation": 0.6,
+    "vocal_synth": 0.7
+  }
+}

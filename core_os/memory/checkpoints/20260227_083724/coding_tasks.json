@@ -1,0 +1,8 @@
+[
+    {
+        "description": "Generate a short Python script that simulates a console animation or ASCII art representation of a bearded lady dancing across a creek. The animation should be simple, character-based, and move horizontally across the screen, perhaps changing a few characters to simulate dancing.",
+        "status": "completed",
+        "tool_name": "bearded_lady_dance",
+        "output_file": "core_os/dynamic_tools/bearded_lady_dance.py"
+    }
+]

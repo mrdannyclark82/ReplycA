@@ -1,0 +1,4 @@
+  File "main.py", line 1002
+    return res[0] if res else None.
+                                   ^
+SyntaxError: invalid syntax

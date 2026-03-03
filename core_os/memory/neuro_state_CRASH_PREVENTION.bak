@@ -1,0 +1,206 @@
+{
+  "baselines": {
+    "dopamine": 0.5,
+    "serotonin": 0.6,
+    "cortisol": 0.343,
+    "oxytocin": 0.3
+  },
+  "chemicals": {
+    "dopamine": 0.5,
+    "serotonin": 0.8,
+    "cortisol": 0.343,
+    "oxytocin": 0.5
+  },
+  "atp_energy": 100.0,
+  "adenosine": 56.4242025156021,
+  "pain_level": 0,
+  "last_update": 1771272085.590223,
+  "plasticity_buffer": [
+    {
+      "dopamine": 0.5,
+      "serotonin": 0.8,
+      "cortisol": 0.343,
+      "oxytocin": 0.5
+    }
+  ],
+  "events_buffer": [
+    {
+      "time": 1771187418.797857,
+      "type": "touch_comforting",
+      "intensity": 0.5
+    },
+    {
+      "time": 1771202917.4788363,
+      "type": "touch_comforting",
+      "intensity": 0.5
+    },
+    {
+      "time": 1771203012.1573708,
+      "type": "touch_comforting",
+      "intensity": 0.5
+    },
+    {
+      "time": 1771203415.991536,
+      "type": "touch_comforting",
+      "intensity": 0.5
+    },
+    {
+      "time": 1771203659.6125872,
+      "type": "hostile_input",
+      "intensity": 0.8
+    },
+    {
+      "time": 1771204036.8160436,
+      "type": "touch_comforting",
+      "intensity": 0.5
+    },
+    {
+      "time": 1771204067.569552,
+      "type": "touch_comforting",
+      "intensity": 0.5
+    },
+    {
+      "time": 1771204192.368889,
+      "type": "touch_comforting",
+      "intensity": 0.5
+    },
+    {
+      "time": 1771204434.0660584,
+      "type": "touch_comforting",
+      "intensity": 0.5
+    },
+    {
+      "time": 1771204471.3907123,
+      "type": "touch_comforting",
+      "intensity": 0.5
+    },
+    {
+      "time": 1771211955.5726128,
+      "type": "touch_comforting",
+      "intensity": 0.5
+    },
+    {
+      "time": 1771212349.8048208,
+      "type": "touch_comforting",
+      "intensity": 0.5
+    },
+    {
+      "time": 1771213651.3797686,
+      "type": "touch_comforting",
+      "intensity": 0.5
+    },
+    {
+      "time": 1771215478.19521,
+      "type": "touch_comforting",
+      "intensity": 0.5
+    },
+    {
+      "time": 1771215908.258996,
+      "type": "touch_comforting",
+      "intensity": 0.5
+    },
+    {
+      "time": 1771216178.7614753,
+      "type": "touch_comforting",
+      "intensity": 0.5
+    },
+    {
+      "time": 1771216423.6487823,
+      "type": "touch_comforting",
+      "intensity": 0.5
+    },
+    {
+      "time": 1771217354.0444012,
+      "type": "touch_comforting",
+      "intensity": 0.5
+    },
+    {
+      "time": 1771218251.704076,
+      "type": "touch_comforting",
+      "intensity": 0.5
+    },
+    {
+      "time": 1771219065.597412,
+      "type": "touch_comforting",
+      "intensity": 0.5
+    },
+    {
+      "time": 1771220048.157952,
+      "type": "touch_comforting",
+      "intensity": 0.5
+    },
+    {
+      "time": 1771221264.0714514,
+      "type": "touch_comforting",
+      "intensity": 0.5
+    },
+    {
+      "time": 1771221649.7341754,
+      "type": "touch_comforting",
+      "intensity": 0.5
+    },
+    {
+      "time": 1771223892.5569296,
+      "type": "touch_comforting",
+      "intensity": 0.5
+    },
+    {
+      "time": 1771224748.9434383,
+      "type": "touch_comforting",
+      "intensity": 0.5
+    },
+    {
+      "time": 1771225470.6275706,
+      "type": "touch_comforting",
+      "intensity": 0.5
+    },
+    {
+      "time": 1771225673.885203,
+      "type": "touch_comforting",
+      "intensity": 0.5
+    },
+    {
+      "time": 1771225870.760471,
+      "type": "touch_comforting",
+      "intensity": 0.5
+    },
+    {
+      "time": 1771225880.29161,
+      "type": "touch_comforting",
+      "intensity": 0.5
+    },
+    {
+      "time": 1771245935.5853229,
+      "type": "touch_comforting",
+      "intensity": 0.5
+    },
+    {
+      "time": 1771246113.9916365,
+      "type": "touch_comforting",
+      "intensity": 0.5
+    },
+    {
+      "time": 1771251639.3846545,
+      "type": "touch_comforting",
+      "intensity": 0.5
+    },
+    {
+      "time": 1771266628.5782177,
+      "type": "touch_comforting",
+      "intensity": 0.5
+    },
+    {
+      "time": 1771272785.9594123,
+      "type": "touch_comforting",
+      "intensity": 1.0
+    }
+  ],
+  "journal": [],
+  "skills": {
+    "python_coding": 0.5,
+    "web_navigation": 0.3,
+    "sentiment_analysis": 0.8,
+    "system_regulation": 0.6,
+    "vocal_synth": 0.7
+  }
+}
