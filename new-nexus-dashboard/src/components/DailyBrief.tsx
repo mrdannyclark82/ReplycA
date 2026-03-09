@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import axios from 'axios';
 import { BookOpen, ChevronLeft, ChevronRight, RefreshCw } from 'lucide-react';
 
-const API = 'http://100.89.122.112:8000';
+const API = '';
 
 interface Brief { date: string; filename: string; }
 

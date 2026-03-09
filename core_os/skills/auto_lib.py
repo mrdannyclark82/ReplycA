@@ -130,13 +130,13 @@ class UnifiedModelManager:
         # Rate-limit backoff: if xAI 429s, skip it until this time
         self._xai_backoff_until: float = 0.0
 
-        # Provider priority: xAI → Local Ollama (with cloud model tag)
-        if self.xai_key:
-            self.provider = "xai"
-            self.current_model = DEFAULT_MODEL
-        elif OLLAMA_AVAILABLE:
+        # Provider priority: Ollama (primary) → xAI (fallback if Ollama unavailable)
+        if OLLAMA_AVAILABLE:
             self.provider = "ollama"
             self.current_model = OLLAMA_MODEL
+        elif self.xai_key:
+            self.provider = "xai"
+            self.current_model = DEFAULT_MODEL
         else:
             self.provider = "none"
             self.current_model = DEFAULT_MODEL
@@ -235,29 +235,31 @@ class UnifiedModelManager:
 
         import time as _t
         now = _t.time()
-        xai_available = (self.provider == "xai" or (self.xai_key and self.provider not in ("ollama",))) \
-                        and now >= self._xai_backoff_until
 
-        # 1. Try xAI if available and not in rate-limit backoff
-        if xai_available:
-            response = self._chat_xai(messages, tools, options)
-            # If response indicates rate-limit, back off xAI for 10 minutes
-            content = response.get("message", {}).get("content", "")
-            if "429" in content or "Too Many Requests" in content or "xAI Error" in content:
-                self._xai_backoff_until = now + 600  # 10 min backoff
-                print(f"[!] xAI rate-limited — backing off for 10 min, using Ollama")
-                if OLLAMA_AVAILABLE:
-                    try:
-                        response = _ollama_to_dict(ollama.chat(model=self.current_model or OLLAMA_MODEL, messages=messages))
-                    except Exception as oe:
-                        print(f"[!] Ollama fallback error: {oe}")
-        elif OLLAMA_AVAILABLE:
-            # Use Ollama (local with :cloud tag routes via Ollama cloud infra)
+        # 1. Try Ollama first (primary provider)
+        if OLLAMA_AVAILABLE and self.provider != "xai":
             try:
                 response = _ollama_to_dict(ollama.chat(model=self.current_model or OLLAMA_MODEL, messages=messages, tools=tools))
             except Exception as e:
                 print(f"[!] Ollama Error: {e}")
-                response = {"message": {"role": "assistant", "content": f"[System Recovery]: Ollama failed ({e}). Please check local model service."}}
+                # Fall back to xAI if available
+                if self.xai_key and now >= self._xai_backoff_until:
+                    print(f"[*] Ollama failed, trying xAI fallback...")
+                    response = self._chat_xai(messages, tools, options)
+                else:
+                    response = {"message": {"role": "assistant", "content": f"[System Recovery]: Ollama failed ({e}). Please check local model service."}}
+        elif self.xai_key and now >= self._xai_backoff_until:
+            # xAI explicitly selected or Ollama unavailable
+            response = self._chat_xai(messages, tools, options)
+            content = response.get("message", {}).get("content", "")
+            if "429" in content or "Too Many Requests" in content:
+                self._xai_backoff_until = now + 600
+                print(f"[!] xAI 429 rate-limited — backing off 10 min")
+                if OLLAMA_AVAILABLE:
+                    try:
+                        response = _ollama_to_dict(ollama.chat(model=self.current_model or OLLAMA_MODEL, messages=messages, tools=tools))
+                    except Exception as oe:
+                        print(f"[!] Ollama fallback error: {oe}")
         else:
             response = {"message": {"role": "assistant", "content": "[System Error]: No valid AI provider available (xAI or Ollama)."}}
 

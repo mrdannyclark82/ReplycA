@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import axios from 'axios';
 import { Mail, Send, RefreshCw, Reply, AlertCircle } from 'lucide-react';
 
-const API = 'http://100.89.122.112:8000';
+const API = '';
 
 interface Email {
   id: string;

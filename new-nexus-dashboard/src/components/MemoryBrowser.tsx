@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import { Search, Trash2, Plus, Database, RefreshCw } from 'lucide-react';
 
-const API = 'http://100.89.122.112:8000';
+const API = '';
 
 interface Memory {
   rowid: number;

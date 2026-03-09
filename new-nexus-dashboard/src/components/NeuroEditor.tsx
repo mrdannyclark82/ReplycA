@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import axios from 'axios';
 import { Zap, Save, RefreshCw } from 'lucide-react';
 
-const API = 'http://100.89.122.112:8000';
+const API = '';
 
 const NEURO_KEYS = [
   { key: 'dopamine',         label: 'Dopamine',        color: '#f59e0b', desc: 'Curiosity & drive' },

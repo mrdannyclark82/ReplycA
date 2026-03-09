@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 import { ArrowUpCircle, RefreshCw, Play, CheckCircle, AlertCircle } from 'lucide-react';
 
-const API = 'http://100.89.122.112:8000';
+const API = '';
 
 interface Update { pkg: string; from: string; to: string; raw: string; }
 

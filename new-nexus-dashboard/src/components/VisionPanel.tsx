@@ -2,7 +2,7 @@ import { useState, useRef } from 'react';
 import axios from 'axios';
 import { Eye, Upload, X, Loader } from 'lucide-react';
 
-const API = 'http://100.89.122.112:8000';
+const API = '';
 
 export default function VisionPanel() {
   const [imagePreview, setImagePreview] = useState<string | null>(null);

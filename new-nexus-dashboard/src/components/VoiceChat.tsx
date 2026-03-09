@@ -2,7 +2,7 @@ import { useState, useRef, useEffect } from 'react';
 import axios from 'axios';
 import { Mic, MicOff, Volume2, VolumeX, Send, Loader } from 'lucide-react';
 
-const API = 'http://100.89.122.112:8000';
+const API = '';
 
 interface Message {
   role: 'user' | 'assistant';

@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import axios from 'axios';
 import { Radar, RefreshCw, Zap, ChevronDown, ChevronUp, Clock } from 'lucide-react';
 
-const SERVER = import.meta.env.VITE_SERVER_URL ?? 'http://100.89.122.112:8000';
+const SERVER = '';
 
 interface Scan {
   heading: string;

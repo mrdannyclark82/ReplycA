@@ -4,7 +4,7 @@ import base64
 import json
 from pathlib import Path
 
-TOKEN = "${GITHUB_TOKEN}"
+TOKEN = os.environ.get("GITHUB_TOKEN", "")
 OWNER = "mrdannyclark82"
 REPO = "ReplycA"
 BRANCH = "main"

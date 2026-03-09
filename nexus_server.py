@@ -152,8 +152,136 @@ async def chat_endpoint(chat: ChatMessage):
     if not model_manager:
         return {"response": "[SYSTEM] Milla core offline. Rebuild in progress."}
 
+    # --- Tool definitions Milla can call ---
+    MILLA_TOOLS = [
+        {
+            "type": "function",
+            "function": {
+                "name": "web_search",
+                "description": "Search the web for current information, news, or research topics",
+                "parameters": {
+                    "type": "object",
+                    "properties": {"query": {"type": "string", "description": "The search query"}},
+                    "required": ["query"],
+                },
+            },
+        },
+        {
+            "type": "function",
+            "function": {
+                "name": "shell_exec",
+                "description": "Execute a bash shell command on the Nexus server",
+                "parameters": {
+                    "type": "object",
+                    "properties": {"command": {"type": "string", "description": "The bash command to run"}},
+                    "required": ["command"],
+                },
+            },
+        },
+        {
+            "type": "function",
+            "function": {
+                "name": "read_file",
+                "description": "Read the contents of a file on the Nexus server",
+                "parameters": {
+                    "type": "object",
+                    "properties": {"path": {"type": "string", "description": "Relative path from the project root"}},
+                    "required": ["path"],
+                },
+            },
+        },
+        {
+            "type": "function",
+            "function": {
+                "name": "write_file",
+                "description": "Write or update a file on the Nexus server",
+                "parameters": {
+                    "type": "object",
+                    "properties": {
+                        "path": {"type": "string", "description": "Relative path from project root"},
+                        "content": {"type": "string", "description": "Full file content to write"},
+                    },
+                    "required": ["path", "content"],
+                },
+            },
+        },
+        {
+            "type": "function",
+            "function": {
+                "name": "run_skill",
+                "description": "Execute an installed Nexus skill plugin",
+                "parameters": {
+                    "type": "object",
+                    "properties": {
+                        "skill_name": {"type": "string", "description": "The skill name (e.g. daily_quote)"},
+                        "payload": {"type": "object", "description": "Arguments for the skill"},
+                    },
+                    "required": ["skill_name"],
+                },
+            },
+        },
+        {
+            "type": "function",
+            "function": {
+                "name": "memory_search",
+                "description": "Search Milla's long-term memory database",
+                "parameters": {
+                    "type": "object",
+                    "properties": {"query": {"type": "string", "description": "The memory search query"}},
+                    "required": ["query"],
+                },
+            },
+        },
+    ]
+
+    def _dispatch_tool(name: str, args: dict) -> str:
+        """Execute a tool call and return result as string."""
+        try:
+            if name == "web_search":
+                from core_os.actions import web_search
+                result = web_search(args.get("query", ""))
+                if result.get("status") == "success":
+                    results = result.get("results", [])
+                    return "\n".join(f"- {r}" for r in results[:5]) if results else "No results found."
+                return f"Search error: {result.get('msg', 'unknown')}"
+
+            elif name == "shell_exec":
+                from core_os.actions import terminal_executor
+                result = terminal_executor(args.get("command", ""))
+                if isinstance(result, dict):
+                    out = result.get("stdout", "").strip()
+                    err = result.get("stderr", "").strip()
+                    return out or err or f"Exit code: {result.get('returncode', 0)}"
+                return str(result)
+
+            elif name == "read_file":
+                p = Path(PROJECT_ROOT) / args.get("path", "")
+                if p.is_file():
+                    return p.read_text(errors='replace')[:4000]
+                return f"File not found: {args.get('path')}"
+
+            elif name == "write_file":
+                p = Path(PROJECT_ROOT) / args.get("path", "")
+                p.parent.mkdir(parents=True, exist_ok=True)
+                p.write_text(args.get("content", ""))
+                return f"Written: {args.get('path')}"
+
+            elif name == "run_skill":
+                result = execute_skill(args.get("skill_name", ""), args.get("payload", {}))
+                return str(result.get("result", result))
+
+            elif name == "memory_search":
+                items = model_manager._query_long_term_db(args.get("query", ""), limit=6)
+                if items:
+                    return "\n".join(f"[{i['type']}] {i['content']}" for i in items)
+                return "No memories found."
+
+        except Exception as e:
+            return f"Tool error ({name}): {e}"
+        return "Unknown tool."
+
     def _process():
-        """All blocking work in one thread — cortex + model call."""
+        """All blocking work in one thread — cortex + model call + tool loop."""
         cortex_data = {}
         options = {}
         executive_prefix = ""
@@ -177,15 +305,45 @@ async def chat_endpoint(chat: ChatMessage):
         full_message = sense_prompt + executive_prefix + chat.message
         messages = history + [{"role": "user", "content": full_message}]
 
-        response = model_manager.chat(messages=messages, options=options)
-        content  = response['message']['content']
+        # --- Agentic tool-call loop (up to 5 rounds) ---
+        content = ""
+        tool_calls_made = []
+        for _round in range(5):
+            response = model_manager.chat(messages=messages, tools=MILLA_TOOLS, options=options)
+            msg = response.get("message", {})
+            tool_calls = msg.get("tool_calls") or []
+
+            if not tool_calls:
+                content = msg.get("content", "")
+                break
+
+            # Execute all tool calls and append results
+            messages.append({"role": "assistant", "content": msg.get("content", ""), "tool_calls": tool_calls})
+            for tc in tool_calls:
+                fn = tc.get("function", {})
+                name = fn.get("name", "")
+                raw_args = fn.get("arguments", {})
+                args = raw_args if isinstance(raw_args, dict) else json.loads(raw_args or "{}")
+                tool_result = _dispatch_tool(name, args)
+                tool_calls_made.append(f"{name}({args}) → {str(tool_result)[:200]}")
+                logging.info(f"[Tool] {name}({args}) → {str(tool_result)[:100]}")
+                messages.append({
+                    "role": "tool",
+                    "name": name,
+                    "content": str(tool_result),
+                })
+        else:
+            # Hit loop limit — get final answer
+            response = model_manager.chat(messages=messages, options=options)
+            content = response.get("message", {}).get("content", "")
 
         # Strip tool-call JSON wrapping from local models (milla-rayne / qwen)
+        if not content:
+            content = "[System: No response generated]"
         try:
             import json as _json
             parsed = _json.loads(content)
             if isinstance(parsed, dict):
-                # {"name":"speak_response","arguments":{"text":"..."}}
                 text = parsed.get("arguments", {}).get("text") or \
                        parsed.get("text") or \
                        parsed.get("response") or \
@@ -193,21 +351,25 @@ async def chat_endpoint(chat: ChatMessage):
                 if text:
                     content = text
         except Exception:
-            pass  # not JSON, leave as-is
+            pass
+
         append_shared_messages([
             {"role": "user",      "content": chat.message},
             {"role": "assistant", "content": content},
         ])
-        return content, cortex_data
+        return content, cortex_data, tool_calls_made
 
     try:
         loop = asyncio.get_event_loop()
-        content, cortex_data = await loop.run_in_executor(None, _process)
-        return {
+        content, cortex_data, tools_used = await loop.run_in_executor(None, _process)
+        result = {
             "response": content,
             "neuro":    cortex_data.get("chemicals", {}),
             "state":    cortex_data.get("state", "HOMEOSTASIS"),
         }
+        if tools_used:
+            result["tools_used"] = tools_used
+        return result
     except Exception as e:
         return {"response": f"[SYSTEM ERROR] {str(e)}"}
 

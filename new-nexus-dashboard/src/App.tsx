@@ -33,7 +33,7 @@ type RightPanel = 'console' | 'skills' | 'cron' | 'cast' | 'calendar' | 'models'
 interface Alert { type: string; source: string; text: string; }
 interface SearchResult { source: string; id: string | number; text: string; meta: string; }
 
-const SERVER = import.meta.env.VITE_SERVER_URL ?? 'http://100.89.122.112:8000';
+const SERVER = '';
 const WS_SERVER = SERVER.replace(/^http/, 'ws');
 
 function App() {

@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import axios from 'axios';
 import { User, Save, RotateCcw, Edit3, CheckCircle, AlertCircle } from 'lucide-react';
 
-const API = 'http://100.89.122.112:8000';
+const API = '';
 
 export default function PersonaEditor() {
   const [prompt, setPrompt] = useState('');
