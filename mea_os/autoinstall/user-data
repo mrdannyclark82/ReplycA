@@ -1,0 +1,149 @@
+#cloud-config
+autoinstall:
+  version: 1
+
+  locale: en_US.UTF-8
+  keyboard:
+    layout: us
+
+  # ----------------------------------------------------------------
+  # Identity — username: nexus / password: nexus
+  # ----------------------------------------------------------------
+  identity:
+    hostname: mea-os
+    realname: Nexus
+    username: nexus
+    password: "$6$p0klCvvL67dapsqQ$ABVderYt9fMpfr2/OO5tzNDx6DgkeHOCzTqApulDfkegpqo3OmUw..zkP5ti1U/b3Z8aaxxihHWET03rsuvYN0"
+
+  ssh:
+    install-server: true
+    allow-pw: true
+
+  # ----------------------------------------------------------------
+  # Storage — LVM auto-layout (safe default for VirtualBox)
+  # ----------------------------------------------------------------
+  storage:
+    layout:
+      name: lvm
+
+  # ----------------------------------------------------------------
+  # Packages installed during OS setup
+  # ----------------------------------------------------------------
+  packages:
+    # Minimal desktop (LXQt — lightweight, tweakable, low RAM)
+    - lxqt
+    - lightdm
+    - xorg
+    - xserver-xorg
+    - openbox
+
+    # VirtualBox guest additions (display resize, clipboard, shared folders)
+    - virtualbox-guest-utils
+    - virtualbox-guest-x11
+
+    # Python runtime
+    - python3-pip
+    - python3-venv
+    - python3-dev
+    - python3-tk
+    - build-essential
+
+    # Git and core tools
+    - git
+    - curl
+    - wget
+    - rsync
+    - tmux
+    - htop
+
+    # Audio (TTS output, ambient sounds)
+    - pulseaudio
+    - pulseaudio-utils
+    - sox
+    - ffmpeg
+    - mpv
+    - portaudio19-dev
+
+    # Pygame display dependencies
+    - libsdl2-dev
+    - libsdl2-image-dev
+    - libsdl2-mixer-dev
+    - libsdl2-ttf-dev
+
+    # Misc system
+    - net-tools
+    - ufw
+    - unzip
+
+    # Node.js (for Nexus Kingdom dashboard build)
+    - nodejs
+    - npm
+
+    # Docker (container management)
+    - docker.io
+
+    # System update checker
+    - apt-file
+
+  # ----------------------------------------------------------------
+  # Post-install commands (run in chroot on the installed system)
+  # ----------------------------------------------------------------
+  late-commands:
+    # -- Clone Nexus Kingdom repo --
+    - git clone https://github.com/mrdannyclark82/ReplycA.git /target/home/nexus/ogdray
+
+    # -- Fix ownership --
+    - chown -R 1000:1000 /target/home/nexus/ogdray
+
+    # -- Set up Python virtualenv --
+    - curtin in-target --target=/target -- su -c "cd /home/nexus/ogdray && python3 -m venv venv" nexus
+    - curtin in-target --target=/target -- su -c "cd /home/nexus/ogdray && venv/bin/pip install --quiet --upgrade pip" nexus
+    - curtin in-target --target=/target -- su -c "cd /home/nexus/ogdray && venv/bin/pip install --quiet -r requirements.txt" nexus
+
+    # -- Build Nexus Kingdom dashboard --
+    - curtin in-target --target=/target -- su -c "cd /home/nexus/ogdray/new-nexus-dashboard && npm install --silent && npm run build" nexus
+
+    # -- Install Ollama (local LLM runtime) --
+    - curtin in-target --target=/target -- bash -c "curl -fsSL https://ollama.ai/install.sh | sh"
+
+    # -- Install Milla core systemd service --
+    - cp /target/home/nexus/ogdray/mea_os/autostart/milla-auto.service /target/etc/systemd/system/milla-auto.service
+    - curtin in-target --target=/target -- systemctl enable milla-auto.service
+
+    # -- Install Milla dashboard systemd service --
+    - cp /target/home/nexus/ogdray/mea_os/autostart/milla-dashboard.service /target/etc/systemd/system/milla-dashboard.service
+    - curtin in-target --target=/target -- systemctl enable milla-dashboard.service
+
+    # -- Add nexus user to docker group --
+    - curtin in-target --target=/target -- usermod -aG docker nexus
+
+    # -- Install crontab --
+    - cp /target/home/nexus/ogdray/mea_os/autostart/nexus_crontab /target/tmp/nexus_crontab
+    - curtin in-target --target=/target -- su -c "crontab /tmp/nexus_crontab" nexus
+
+    # -- Configure LightDM autologin --
+    - cp /target/home/nexus/ogdray/mea_os/autostart/lightdm.conf /target/etc/lightdm/lightdm.conf
+
+    # -- LXQt autostart: boot screen on login --
+    - mkdir -p /target/home/nexus/.config/autostart
+    - cp /target/home/nexus/ogdray/mea_os/autostart/milla-boot.desktop /target/home/nexus/.config/autostart/milla-boot.desktop
+    - chown -R 1000:1000 /target/home/nexus/.config
+
+    # -- Copy .env template (user fills in API keys) --
+    - "[ -f /target/home/nexus/ogdray/.env.example ] && cp /target/home/nexus/ogdray/.env.example /target/home/nexus/ogdray/.env || true"
+
+    # -- Create backup folder --
+    - mkdir -p /target/home/nexus/milla_backups
+    - chown 1000:1000 /target/home/nexus/milla_backups
+
+    # -- Create memory dir with correct permissions --
+    - mkdir -p /target/home/nexus/ogdray/core_os/memory
+    - chown -R 1000:1000 /target/home/nexus/ogdray/core_os
+
+    # -- Set hostname --
+    - echo "mea-os" > /target/etc/hostname
+
+  # ----------------------------------------------------------------
+  # Suppress confirmation prompts
+  # ----------------------------------------------------------------
+  interactive-sections: []

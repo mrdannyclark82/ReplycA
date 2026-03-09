@@ -1,8 +1,9 @@
 import os
 from supabase import create_client, Client
+import os
 
-url = "https://sghsnicxciwgbxjrtzuj.supabase.co"
-key = "${SUPABASE_KEY}"
+url = os.getenv("SUPABASE_URL", "")
+key = os.getenv("SUPABASE_KEY", "")
 supabase: Client = create_client(url, key)
 
 def setup_database():

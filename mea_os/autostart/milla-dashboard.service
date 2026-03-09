@@ -1,0 +1,18 @@
+[Unit]
+Description=Milla RAYNE — Nexus Kingdom Dashboard API
+After=network.target milla-auto.service
+Wants=milla-auto.service
+
+[Service]
+Type=simple
+User=nexus
+WorkingDirectory=/home/nexus/ogdray
+ExecStart=/home/nexus/ogdray/venv/bin/python3 /home/nexus/ogdray/nexus_server.py
+Restart=on-failure
+RestartSec=10
+StandardOutput=journal
+StandardError=journal
+Environment=DISPLAY=:0
+
+[Install]
+WantedBy=multi-user.target

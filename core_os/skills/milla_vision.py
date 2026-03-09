@@ -18,9 +18,11 @@ from datetime import datetime
 # ── Paths ──────────────────────────────────────────────────────────────────
 SCREENSHOT_DIR = "core_os/screenshots"
 LATEST_FRAME   = os.path.join(SCREENSHOT_DIR, "nexus_eye.jpg")
+USB_FRAME      = os.path.join(SCREENSHOT_DIR, "usb_eye.jpg")
 DOME_FRAME     = os.path.join(SCREENSHOT_DIR, "dome_eye.jpg")
 VISION_LOG     = "core_os/memory/visual_history.json"
 TABLET_IP      = os.getenv("TABLET_IP", "192.168.40.115:34213")
+USB_DEVICE_ID  = int(os.getenv("USB_CAMERA_INDEX", 0))
 
 # ── Nest / SDM config (set these in .env) ──────────────────────────────────
 SDM_PROJECT_ID    = os.getenv("NEST_PROJECT_ID", "")       # Device Access project ID
@@ -173,42 +175,102 @@ def capture_tablet_frame():
         return None
 
 
+def capture_usb_frame():
+    """Captures a frame from a local USB webcam using OpenCV."""
+    if cv2 is None:
+        print("[!] Vision: opencv-python not installed — cannot use USB camera.")
+        return None
+    
+    device_path = f"/dev/video{USB_DEVICE_ID}"
+    if not os.path.exists(device_path):
+        # print(f"[!] Vision: {device_path} not found.")
+        return None
+
+    print(f"[*] Vision: Activating local Eye ({device_path})...")
+    try:
+        cap = cv2.VideoCapture(USB_DEVICE_ID)
+        # Give the sensor a moment to adjust exposure
+        time.sleep(0.5) 
+        ret, frame = cap.read()
+        cap.release()
+        if ret:
+            cv2.imwrite(USB_FRAME, frame)
+            # Link to latest
+            if os.path.exists(LATEST_FRAME): os.remove(LATEST_FRAME)
+            os.symlink(os.path.abspath(USB_FRAME), LATEST_FRAME)
+            return USB_FRAME
+        print("[!] Vision: USB capture failed (no frame).")
+        return None
+    except Exception as e:
+        print(f"[!] Vision: USB Capture Error: {e}")
+        return None
+
+
 def capture_frame() -> str | None:
     """
     Priority order:
-      1. Nest camera via SDM API (if NEST_PROJECT_ID set)
-      2. ADB tablet fallback
-      3. Desktop screenshot fallback
+      1. Local USB camera (highest priority)
+      2. Nest camera via SDM API (if NEST_PROJECT_ID set)
+      3. ADB tablet fallback
+      4. Desktop screenshot fallback
     """
+    # 1. Local USB Eye
+    frame = capture_usb_frame()
+    if frame:
+        return frame
+
+    # 2. Nest Eye
     if SDM_PROJECT_ID:
         frame = capture_nest_eye()
         if frame:
             return frame
+    
+    # 3. Tablet Eye
     frame = capture_tablet_frame()
     if frame:
         return frame
+    
+    # 4. Dome Eye (Screenshot)
     return capture_dome_frame()
 
 
 # ── Analysis ────────────────────────────────────────────────────────────────
 
+VISION_MODELS = [
+    "qwen3.5:397b-cloud",  # cloud default — 397B, best quality vision
+    "qwen2.5vl:7b",        # local fallback — 7B vision model
+    "moondream:latest",    # lightweight local last resort
+]
+
 def analyze_visuals(image_path, prompt="Describe what you see in detail."):
-    """Uses the local moondream model via Ollama to analyze the image."""
+    """
+    Analyze an image using the best available vision model.
+    Priority: qwen3.5:397b-cloud → qwen2.5vl:7b → moondream
+    """
     if not image_path or not os.path.exists(image_path):
         return "My eyes are closed or the view is blocked."
-    print("[*] Vision: Processing with moondream...")
-    try:
-        with open(image_path, "rb") as img_file:
+
+    with open(image_path, "rb") as img_file:
+        img_bytes = img_file.read()
+
+    for model in VISION_MODELS:
+        try:
+            print(f"[*] Vision: trying {model}...")
             response = ollama.generate(
-                model="moondream",
+                model=model,
                 prompt=prompt,
-                images=[img_file.read()]
+                images=[img_bytes]
             )
-        description = response.get("response", "Silence...")
-        log_vision(description)
-        return description
-    except Exception as e:
-        return f"[!] Vision Brain Error: {e}"
+            description = response.get("response", "").strip()
+            if description:
+                print(f"[*] Vision: got response from {model}")
+                log_vision(description)
+                return description
+        except Exception as e:
+            print(f"[!] Vision {model} failed: {e}")
+            continue
+
+    return "[!] All vision models failed — check qwen2.5vl:7b and moondream are pulled."
 
 
 def log_vision(description):

@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE abiword PUBLIC "-//ABISOURCE//DTD AWML 1.0 Strict//EN" "http://www.abisource.com/awml.dtd">
+<abiword template="false" xmlns:ct="http://www.abisource.com/changetracking.dtd" xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:math="http://www.w3.org/1998/Math/MathML" xid-max="61" xmlns:dc="http://purl.org/dc/elements/1.1/" fileformat="1.1" xmlns:svg="http://www.w3.org/2000/svg" xmlns:awml="http://www.abisource.com/awml.dtd" xmlns="http://www.abisource.com/awml.dtd" xmlns:xlink="http://www.w3.org/1999/xlink" version="3.0.7" xml:space="preserve" props="dom-dir:ltr; document-footnote-restart-section:0; document-endnote-type:numeric; document-endnote-place-enddoc:1; document-endnote-initial:1; lang:en-US; document-endnote-restart-section:0; document-footnote-restart-page:0; document-footnote-type:numeric; document-footnote-initial:1; document-endnote-place-endsection:0">
+<!-- ======================================================================== -->
+<!-- This file is an AbiWord document.                                        -->
+<!-- AbiWord is a free, Open Source word processor.                           -->
+<!-- More information about AbiWord is available at http://www.abisource.com/ -->
+<!-- You should not edit this file by hand.                                   -->
+<!-- ======================================================================== -->
+
+<metadata>
+<m key="abiword.generator">AbiWord</m>
+<m key="dc.format">application/x-abiword</m>
+</metadata>
+<rdf>
+</rdf>
+<styles>
+<s type="P" name="Normal" basedon="" followedby="Current Settings" props="font-family:Liberation Serif; margin-top:0pt; font-variant:normal; margin-left:0pt; text-indent:0in; widows:2; font-style:normal; font-weight:normal; text-decoration:none; color:000000; line-height:1.0; text-align:left; margin-bottom:0pt; text-position:normal; margin-right:0pt; bgcolor:transparent; font-size:12pt; font-stretch:normal"/>
+</styles>
+<pagesize pagetype="A4" orientation="portrait" width="210.000000" height="297.000000" units="mm" page-scale="1.000000"/>
+<section xid="1">
+<p style="Normal" xid="2" props="text-align:left; dom-dir:ltr"><c props="font-size:48pt; font-weight:bold; font-style:italic"></c># GEMINI.md - Workspace Context</p>
+<p style="Normal" xid="3"><c></c></p>
+<p style="Normal" xid="4" props="text-align:left; dom-dir:ltr">## Project Overview</p>
+<p style="Normal" xid="5"><c></c></p>
+<p style="Normal" xid="6" props="text-align:left; dom-dir:ltr">This directory (`ogdray`) is a development workspace containing a collection of AI-driven tools, agents, and applications. The projects focus on autonomous system regulation, local AI integration (via Ollama), code generation, and experimental interfaces. The workspace is designed for a "co-evolution" workflow between the developer (Dray) and the AI agents (Milla, Elara, etc.).</p>
+<p style="Normal" xid="7"><c></c></p>
+<p style="Normal" xid="8" props="text-align:left; dom-dir:ltr">## Key Components</p>
+<p style="Normal" xid="9"><c></c></p>
+<p style="Normal" xid="10" props="text-align:left; dom-dir:ltr">### 1. ollamafileshare</p>
+<p style="Normal" xid="11" props="text-align:left; dom-dir:ltr">The primary repository for the "Milla" and "Elara" ecosystem. It contains multiple sub-projects:</p>
+<p style="Normal" xid="12" props="text-align:left; dom-dir:ltr">*   **Core OS:** Underlying system logic for agents (`core_os/`).</p>
+<p style="Normal" xid="13" props="text-align:left; dom-dir:ltr">*   **Elara 2.0:** A modern web-based AI assistant built with React, TypeScript, and Vite (`ollamafileshare/Elara2.0`).</p>
+<p style="Normal" xid="14" props="text-align:left; dom-dir:ltr">*   **Milla-Rayne / Millai-Studio:** Advanced AI companion platforms (`ollamafileshare/Milla-Rayne`, `ollamafileshare/Millai-Studio`).</p>
+<p style="Normal" xid="15" props="text-align:left; dom-dir:ltr">*   **Arch Regulator Agent:** A self-regulating agent for Arch Linux (`ollamafileshare/GEMINI.md`).</p>
+<p style="Normal" xid="16" props="text-align:left; dom-dir:ltr">*   **Mayhem OS:** Experimental, chaos-driven AI interaction scripts (`ollamafileshare/mayhem_os`).</p>
+<p style="Normal" xid="17"><c></c></p>
+<p style="Normal" xid="18" props="text-align:left; dom-dir:ltr">### 2. SaccPhras (SaCc PHFRAS)</p>
+<p style="Normal" xid="19" props="text-align:left; dom-dir:ltr">**Systems Admin Co-Creating Projects &amp; Home-Folders Remote Access Supervisor.**</p>
+<p style="Normal" xid="20" props="text-align:left; dom-dir:ltr">A proactive system management suite designed to transition from reactive chat to active system regulation.</p>
+<p style="Normal" xid="21" props="text-align:left; dom-dir:ltr">*   **Manifesto:** `SaccPhras/MANIFESTO.md`</p>
+<p style="Normal" xid="22" props="text-align:left; dom-dir:ltr">*   **Core UI:** `SaccPhras/ui/hawk_tui.py` (Cyberpunk "Predator Console").</p>
+<p style="Normal" xid="23" props="text-align:left; dom-dir:ltr">*   **Tools:** `SaccPhras/tools/scout.py` (Hunting engine).</p>
+<p style="Normal" xid="24"><c></c></p>
+<p style="Normal" xid="25" props="text-align:left; dom-dir:ltr">### 3. lazy</p>
+<p style="Normal" xid="26" props="text-align:left; dom-dir:ltr">A lightweight, one-shot AI code generation tool.</p>
+<p style="Normal" xid="27" props="text-align:left; dom-dir:ltr">*   **Core Script:** `lazy/lazy/lazy.py` - Queries Ollama to generate code blocks (HTML, CSS, JS, Python) and saves them to `output/`.</p>
+<p style="Normal" xid="28" props="text-align:left; dom-dir:ltr">*   **Setup:** `lazy/setup.sh` - Installs requirements and creates the launcher.</p>
+<p style="Normal" xid="29" props="text-align:left; dom-dir:ltr">*   **Usage:** Run the `./lazy/lazy/lazy` executable wrapper.</p>
+<p style="Normal" xid="30"><c></c></p>
+<p style="Normal" xid="31" props="text-align:left; dom-dir:ltr">### 4. ninja</p>
+<p style="Normal" xid="32" props="text-align:left; dom-dir:ltr">A privacy-focused web browser application.</p>
+<p style="Normal" xid="33" props="text-align:left; dom-dir:ltr">*   **Tech Stack:** Electron.</p>
+<p style="Normal" xid="34" props="text-align:left; dom-dir:ltr">*   **Commands:**</p>
+<p style="Normal" xid="35" props="text-align:left; dom-dir:ltr">    *   `npm start`: Runs `electron .`</p>
+<p style="Normal" xid="36" props="text-align:left; dom-dir:ltr">    *   `npm run dev`: Runs `electron . --dev`</p>
+<p style="Normal" xid="37"><c></c></p>
+<p style="Normal" xid="38" props="text-align:left; dom-dir:ltr">### 5. iwantmy.py</p>
+<p style="Normal" xid="39" props="text-align:left; dom-dir:ltr">A standalone "SelfHealingAgent" script.</p>
+<p style="Normal" xid="40" props="text-align:left; dom-dir:ltr">*   **Function:** Uses `easyocr` (Vision), `ollama` (Reasoning), and `subprocess` (Action) to execute terminal tasks and autonomously fix errors by reading the screen.</p>
+<p style="Normal" xid="41" props="text-align:left; dom-dir:ltr">*   **Dependencies:** `easyocr`, `ollama`, `pyautogui`, `duckduckgo_search`.</p>
+<p style="Normal" xid="42"><c></c></p>
+<p style="Normal" xid="43" props="text-align:left; dom-dir:ltr">## Development Conventions</p>
+<p style="Normal" xid="44"><c></c></p>
+<p style="Normal" xid="45" props="text-align:left; dom-dir:ltr">*   **AI Backend:** The workspace heavily relies on a local **Ollama** instance. Ensure it is running and models (e.g., `qwen3-coder:480b-cloud`, `llama2`) are pulled.</p>
+<p style="Normal" xid="46" props="text-align:left; dom-dir:ltr">*   **Python:** A virtual environment (`venv/`) is present in the root. Activate it before running Python scripts (`source venv/bin/activate`).</p>
+<p style="Normal" xid="47" props="text-align:left; dom-dir:ltr">*   **Node.js:** Web projects (`ninja`, `Elara2.0`) use `npm` for dependency management and scripts.</p>
+<p style="Normal" xid="48" props="text-align:left; dom-dir:ltr">*   **Context Files:** Sub-projects often contain their own `GEMINI.md` files (e.g., `ollamafileshare/GEMINI.md`) which provide specific instructions and context for those areas.</p>
+<p style="Normal" xid="49"><c></c></p>
+<p style="Normal" xid="50" props="text-align:left; dom-dir:ltr">## Directory Map</p>
+<p style="Normal" xid="51"><c></c></p>
+<p style="Normal" xid="52" props="text-align:left; dom-dir:ltr">```text</p>
+<p style="Normal" xid="53" props="text-align:left; dom-dir:ltr">/home/dray/ogdray/</p>
+<p style="Normal" xid="54" props="text-align:left; dom-dir:ltr">├── iwantmy.py          # Self-healing AI agent script</p>
+<p style="Normal" xid="55" props="text-align:left; dom-dir:ltr">├── lazy/               # AI code generator</p>
+<p style="Normal" xid="56" props="text-align:left; dom-dir:ltr">├── ninja/              # Electron-based browser</p>
+<p style="Normal" xid="57" props="text-align:left; dom-dir:ltr">├── ollamafileshare/    # Main AI agent repository (Milla, Elara)</p>
+<p style="Normal" xid="58" props="text-align:left; dom-dir:ltr">├── SaccPhras/          # System supervisor (Hawk TUI)</p>
+<p style="Normal" xid="59" props="text-align:left; dom-dir:ltr">└── venv/               # Python virtual environment</p>
+<p style="Normal" xid="60">```</p>
+<p style="Normal" xid="61"></p>
+</section>
+</abiword>

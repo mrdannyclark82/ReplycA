@@ -6,15 +6,15 @@
     "oxytocin": 0.6
   },
   "chemicals": {
-    "dopamine": 0.45,
-    "serotonin": 0.9671145622385231,
-    "cortisol": 0.1,
-    "oxytocin": 0.767114562238523
+    "dopamine": 0.2899999999999999,
+    "serotonin": 0.8,
+    "cortisol": 0.5800000000000001,
+    "oxytocin": 0.6
   },
   "atp_energy": 100.0,
-  "adenosine": 57.36807881832123,
+  "adenosine": 68.81165386152267,
   "pain_level": 0,
-  "last_update": 1772383049.10308,
+  "last_update": 1772937536.528967,
   "plasticity_buffer": [
     {
       "dopamine": 0.45,
@@ -582,39 +582,39 @@
     },
     {
       "dopamine": 0.45,
-      "serotonin": 0.9671145622385231,
+      "serotonin": 0.8,
       "cortisol": 0.1,
-      "oxytocin": 0.767114562238523
+      "oxytocin": 0.6
+    },
+    {
+      "dopamine": 0.29,
+      "serotonin": 0.8,
+      "cortisol": 0.58,
+      "oxytocin": 0.6
+    },
+    {
+      "dopamine": 0.3838201920203287,
+      "serotonin": 0.8,
+      "cortisol": 0.2985394239390139,
+      "oxytocin": 0.6
     },
     {
       "dopamine": 0.45,
-      "serotonin": 0.9671145622385231,
-      "cortisol": 0.1,
-      "oxytocin": 0.767114562238523
+      "serotonin": 0.8,
+      "cortisol": 0.10000000000000005,
+      "oxytocin": 0.6
     },
     {
-      "dopamine": 0.45,
-      "serotonin": 0.9671145622385231,
-      "cortisol": 0.1,
-      "oxytocin": 0.767114562238523
+      "dopamine": 0.29,
+      "serotonin": 0.8,
+      "cortisol": 0.58,
+      "oxytocin": 0.6
     },
     {
-      "dopamine": 0.45,
-      "serotonin": 0.9671145622385231,
-      "cortisol": 0.1,
-      "oxytocin": 0.767114562238523
-    },
-    {
-      "dopamine": 0.45,
-      "serotonin": 0.9671145622385231,
-      "cortisol": 0.1,
-      "oxytocin": 0.767114562238523
-    },
-    {
-      "dopamine": 0.45,
-      "serotonin": 0.9671145622385231,
-      "cortisol": 0.1,
-      "oxytocin": 0.767114562238523
+      "dopamine": 0.2899999999999999,
+      "serotonin": 0.8,
+      "cortisol": 0.5800000000000001,
+      "oxytocin": 0.6
     }
   ],
   "events_buffer": [
@@ -667,6 +667,21 @@
       "time": 1772383049.1050868,
       "type": "touch_comforting",
       "intensity": 0.5
+    },
+    {
+      "time": 1772753268.6217968,
+      "type": "hostile_input",
+      "intensity": 0.8
+    },
+    {
+      "time": 1772757591.523079,
+      "type": "hostile_input",
+      "intensity": 0.8
+    },
+    {
+      "time": 1772937536.5323539,
+      "type": "hostile_input",
+      "intensity": 0.8
     }
   ],
   "journal": [],

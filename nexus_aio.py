@@ -23,9 +23,21 @@ try:
     from core_os.memory.agent_memory import memory
     from core_os.actions import terminal_executor
     from core_os.skills.scout import Scout
+    from core_os.milla_nexus import nexus_pulse
 except ImportError as e:
     print(f"[!] Nexus-AIO Critical Failure: Missing core_os modules. ({e})")
     sys.exit(1)
+
+import threading
+
+def run_pulse_background():
+    """Runs the Nexus pulse every 10 minutes in the background."""
+    while True:
+        try:
+            nexus_pulse()
+        except Exception as e:
+            print(f"\n[!] Background Pulse Error: {e}")
+        time.sleep(600)
 
 # ==============================================================================
 # CONFIG & PATHS
@@ -97,6 +109,35 @@ def handle_command(cmd_str):
                 print("[!] Usage: /fix <index> or /fix all")
         return True
 
+    elif cmd.startswith("/vla"):
+        goal = cmd_str[len("/vla"):].strip()
+        if not goal:
+            print("[!] Usage: /vla <goal description>")
+        else:
+            print(f"[*] Dispatching VLA Goal: {goal}")
+            # The vla_dispatcher will be imported in the next step
+            try:
+                from core_os.actions.agentic_control import vla_dispatcher
+                result = vla_dispatcher.execute_grounded_action(goal)
+                print(f"[+] VLA Result: {result}")
+            except Exception as e:
+                print(f"[!] VLA Execution Error: {e}")
+        return True
+
+    elif cmd.startswith("/repair"):
+        task = cmd_str[len("/repair"):].strip()
+        if not task:
+            print("[!] Usage: /repair <task description>")
+        else:
+            print(f"[*] Initiating Autonomous Repair for: {task}")
+            try:
+                from core_os.actions.repair.self_healing import repair_agent
+                result = repair_agent.execute_task(task)
+                print(f"[+] Repair Result: {result}")
+            except Exception as e:
+                print(f"[!] Repair Execution Error: {e}")
+        return True
+
     elif cmd.startswith("/model"):
         target = cmd[len("/model"):].strip()
         if not target:
@@ -117,6 +158,19 @@ def handle_command(cmd_str):
             print(f"[{role}]: {content[:100]}...")
         return True
 
+    elif cmd == "/status":
+        print_hud()
+        return True
+
+    elif cmd == "/gim":
+        print("[*] Triggering GIM Monologue...")
+        try:
+            from milla_gim import generate_monologue
+            generate_monologue()
+        except ImportError:
+            print("[!] GIM Module not found.")
+        return True
+
     elif cmd == "/exit":
         print("[*] Shuting down Nexus-AIO. Pulse remains in background.")
         sys.exit(0)
@@ -132,9 +186,13 @@ def handle_command(cmd_str):
     return False
 
 def main_loop():
+    # Start the background pulse
+    pulse_thread = threading.Thread(target=run_pulse_background, daemon=True)
+    pulse_thread.start()
+
     print_hud()
     print("[*] M.I.L.L.A. R.A.Y.N.E. Executive Console Active.")
-    print("[*] Commands: /scan, /fix, /model, /history, !shell, /exit")
+    print("[*] Commands: /scan, /fix, /model, /history, /status, /gim, /vla, /repair, !shell, /exit")
     
     while True:
         try:

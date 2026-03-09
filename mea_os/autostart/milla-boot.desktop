@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Application
+Name=Milla Boot Screen
+Comment=MEA OS — Milla neural mesh boot animation + dashboard
+Exec=bash -c "cd /home/nexus/ogdray && DISPLAY=:0 /home/nexus/ogdray/venv/bin/python3 milla_boot_screen.py; /home/nexus/ogdray/venv/bin/python3 nexus_server.py >> /home/nexus/ogdray/nexus_dashboard.log 2>&1 &"
+Hidden=false
+NoDisplay=false
+X-GNOME-Autostart-enabled=true

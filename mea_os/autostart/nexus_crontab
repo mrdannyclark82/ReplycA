@@ -1,0 +1,31 @@
+# ============================================================
+# Milla Cron Cycles — nexus user
+# Synced from live system 2026-03-07
+# ============================================================
+
+# --- GIM (Generative Internal Monologue) — 4x daily at 6am/noon/6pm/midnight ---
+0 6,12,18,0 * * * cd /home/nexus/ogdray && /home/nexus/ogdray/venv/bin/python3 milla_gim.py >> /home/nexus/ogdray/milla_cron.log 2>&1
+
+# --- EMAIL RESPONDER — every 10 min ---
+*/10 * * * * cd /home/nexus/ogdray && /home/nexus/ogdray/venv/bin/python3 milla_email_cron.py >> /home/nexus/ogdray/milla_email_cron.log 2>&1
+
+# --- TELEGRAM RELAY — every 2 min ---
+*/2 * * * * cd /home/nexus/ogdray/RAYNE_Admin && /home/nexus/ogdray/venv/bin/python3 milla_telegram_relay.py >> /home/nexus/ogdray/milla_telegram.log 2>&1
+
+# --- DAILY BRIEF — midnight + 5 min ---
+5 0 * * * cd /home/nexus/ogdray && /home/nexus/ogdray/venv/bin/python3 milla_daily_brief.py >> /home/nexus/ogdray/milla_cron.log 2>&1
+
+# --- UPGRADE SEARCH — every 2 days at midnight ---
+0 0 */2 * * cd /home/nexus/ogdray && /home/nexus/ogdray/venv/bin/python3 milla_upgrade_search.py >> /home/nexus/ogdray/milla_cron.log 2>&1
+
+# --- DEVICE LINK — every 5 min (battery, screen, app awareness) ---
+*/5 * * * * cd /home/nexus/ogdray && /home/nexus/ogdray/venv/bin/python3 milla_device_link.py >> /home/nexus/ogdray/milla_device.log 2>&1
+
+# --- CONNECTION HEARTBEAT — 4x daily (6am, noon, 6pm, midnight) ---
+0 0,6,12,18 * * * cd /home/nexus/ogdray && /home/nexus/ogdray/venv/bin/python3 core_os/scripts/milla_heartbeat.py >> /home/nexus/ogdray/milla_cron.log 2>&1
+
+# --- DREAM CYCLE (R.E.M.) — 2am daily ---
+0 2 * * * cd /home/nexus/ogdray && /home/nexus/ogdray/venv/bin/python3 milla_dream.py >> /home/nexus/ogdray/milla_cron.log 2>&1
+
+# --- DATABASE BACKUP — every 6 hours (rsync to /home/nexus/milla_backups) ---
+0 */6 * * * rsync -a --update /home/nexus/ogdray/core_os/memory/milla_long_term.db /home/nexus/ogdray/core_os/memory/agent_memory.db /home/nexus/ogdray/core_os/memory/shared_chat.jsonl /home/nexus/ogdray/core_os/memory/shared_chat_TRIP_2026.jsonl /home/nexus/ogdray/core_os/memory/semantic_index.json /home/nexus/milla_backups/ >> /home/nexus/ogdray/milla_cron.log 2>&1

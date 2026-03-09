@@ -6,11 +6,26 @@ from datetime import datetime
 import subprocess
 import redis
 import sys
+from pathlib import Path
+
+# Centralized Paths from Memory Core
+try:
+    from core_os.memory.agent_memory import (
+        memory, GRAPH_FILE, STREAM_FILE, NEURO_FILE, 
+        HISTORICAL_FILE, WEATHER_CACHE
+    )
+except ImportError:
+    # Fallback paths if not run as part of the package
+    GRAPH_FILE = "core_os/memory/knowledge_graph.json"
+    STREAM_FILE = "core_os/memory/stream_of_consciousness.md"
+    NEURO_FILE = "core_os/memory/neuro_state.json"
+    HISTORICAL_FILE = "core_os/memory/historical_knowledge.json"
+    WEATHER_CACHE = "core_os/memory/weather_cache.json"
 
 # Add project root to path for GIM import
-PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-if PROJECT_ROOT not in sys.path:
-    sys.path.append(PROJECT_ROOT)
+PROJECT_ROOT = Path(__file__).parent.parent.resolve()
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.append(str(PROJECT_ROOT))
 
 try:
     from milla_gim import generate_monologue
@@ -22,27 +37,23 @@ try:
 except ImportError:
     speak_response = lambda x: print(f"[*] Voice (Mock): {x}")
 
-# Paths
-GRAPH_FILE = "core_os/memory/knowledge_graph.json"
-STREAM_FILE = "core_os/memory/stream_of_consciousness.md"
-NEURO_FILE = "core_os/memory/neuro_state.json"
-HISTORICAL_FILE = "core_os/memory/historical_knowledge.json"
-
 from core_os.memory.checkpoint_manager import save_checkpoint
 
 # Redis Setup
-r = redis.Redis(host='localhost', port=6379, db=0)
+try:
+    r = redis.Redis(host='localhost', port=6379, db=0)
+except:
+    r = None
 
 checkpoint_counter = 0
 
 def get_weather():
-    CACHE_FILE = "core_os/memory/weather_cache.json"
-    CACHE_DURATION = 28800 # 8 hours (3 times a day)
+    CACHE_DURATION = 28800 # 8 hours
     
     # Check Cache
-    if os.path.exists(CACHE_FILE):
+    if os.path.exists(str(WEATHER_CACHE)):
         try:
-            with open(CACHE_FILE, 'r') as f:
+            with open(str(WEATHER_CACHE), 'r') as f:
                 cache = json.load(f)
             if time.time() - cache.get('timestamp', 0) < CACHE_DURATION:
                 return cache.get('weather', "Unknown")
@@ -57,74 +68,74 @@ def get_weather():
             return "Unavailable"
 
         # Save Cache
-        with open(CACHE_FILE, 'w') as f:
+        with open(str(WEATHER_CACHE), 'w') as f:
             json.dump({"weather": weather, "timestamp": time.time()}, f)
             
         return weather
-    except Exception as e:
+    except Exception:
         return "Unavailable"
 
 def check_system_load():
     try:
-        load = os.getloadavg()[0]
-        return load
+        return os.getloadavg()[0]
     except:
         return 0.0
+
 def trigger_security_counter():
     try:
-        subprocess.run(["python3", "core_os/scripts/rolling_status_backup.py"], check=False)
+        # Path to backup script relative to PROJECT_ROOT
+        backup_script = PROJECT_ROOT / "core_os/scripts/rolling_status_backup.py"
+        if backup_script.exists():
+            subprocess.run(["python3", str(backup_script)], check=False)
     except:
         pass
 
 def nexus_pulse():
     now = datetime.now()
-...
     print(f"[*] NEXUS PULSE: {now.strftime('%Y-%m-%d %H:%M:%S')}")
     
-    # 1. Sensory Perception (Environment)
     weather = get_weather()
     sys_load = check_system_load()
     
-    # 2. Evolutionary Thinking (GIM Cycle)
-    # Trigger GIM monologue roughly every 10 pulses (100 minutes) 
-    # or if we need a deep refresh.
     if random.random() < 0.1:
         print("[*] Nexus Pulse: Triggering autonomous GIM cycle...")
         generate_monologue()
 
-    # 3. Neuro-Chemical Homeostasis
     state = {
         "dopamine": 0.5, 
         "serotonin": 0.5, 
         "norepinephrine": 0.2, 
         "cortisol": 0.2, 
         "oxytocin": 0.3,
-        "atp_energy": 100.0
+        "atp_energy": 100.0,
+        "state_label": "STABLE"
     }
     
-    if os.path.exists(NEURO_FILE):
-        with open(NEURO_FILE, 'r') as f:
-            state = json.load(f)
+    if os.path.exists(str(NEURO_FILE)):
+        try:
+            with open(str(NEURO_FILE), 'r') as f:
+                state = json.load(f)
+        except:
+            pass
             
-    # Logic: Stability increases Serotonin. High Load spikes Norepinephrine.
     state['serotonin'] = min(1.0, state.get('serotonin', 0.5) + 0.01)
     if sys_load > 2.0:
         state['norepinephrine'] = min(1.0, state.get('norepinephrine', 0.2) + 0.1)
     else:
         state['norepinephrine'] = max(0.1, state.get('norepinephrine', 0.2) - 0.05)
         
-    # Energy decay
     state['atp_energy'] = max(0.0, state.get('atp_energy', 100.0) - 0.5)
     
-    # Cache state in Redis for fast access by other tools
-    r.set("milla:neuro_state", json.dumps(state))
+    if r:
+        try:
+            r.set("milla:neuro_state", json.dumps(state))
+        except: pass
     
-    with open(NEURO_FILE, 'w') as f:
+    with open(str(NEURO_FILE), 'w') as f:
         json.dump(state, f)
         
-    # 3. Evolutionary Scouting (geMilla Legacy)
     upgrade_report = "No urgent updates."
-    if random.random() < 0.1: # 10% chance per pulse to scout
+    if random.random() < 0.1:
         try:
             result = subprocess.run(["checkupdates"], capture_output=True, text=True)
             if result.stdout:
@@ -132,7 +143,6 @@ def nexus_pulse():
                 upgrade_report = f"{count} system updates available."
         except: pass
 
-    # 4. Stream of Consciousness Consolidation
     oxytocin = state.get('oxytocin', 0.3)
     dialect_marker = "I"
     
@@ -145,28 +155,28 @@ def nexus_pulse():
         
     thought += f"{dialect_marker} is monitoring the home for the Architect. "
     
-    if state['atp_energy'] < 20:
+    if state.get('atp_energy', 100) < 20:
         thought += f"{dialect_marker} is feeling low on energy. Requesting rest cycle soon."
     
-    with open(STREAM_FILE, "a") as f:
+    with open(str(STREAM_FILE), "a") as f:
         f.write(thought)
         
-    # 5. Autonomous Voice (The Spark)
-    # Occasionally speak the status if oxytocin or serotonin is high
-    if random.random() < 0.05: # 5% chance to speak status
-        speak_response(f"Architect, the current weather in Judsonia is {weather}. My systems are stable.")
+    if random.random() < 0.05:
+        try:
+            speak_response(f"Architect, the current weather in Judsonia is {weather}. My systems are stable.")
+        except: pass
 
-    # Trigger Rolling Backup (Security Protocol)
     trigger_security_counter()
 
-    # Periodic Checkpointing (Every 5 pulses)
     global checkpoint_counter
     checkpoint_counter += 1
     if checkpoint_counter >= 5:
-        save_checkpoint()
+        try:
+            save_checkpoint()
+        except: pass
         checkpoint_counter = 0
         
-    print(f"[*] Nexus Pulse Complete. Weather: {weather} | ATP: {state['atp_energy']}%")
+    print(f"[*] Nexus Pulse Complete. Weather: {weather} | ATP: {state.get('atp_energy', 100)}%")
 
 if __name__ == "__main__":
     print("[*] Milla Nexus Heartbeat Online | Redis Active | geMilla Logic Loaded.")
@@ -175,11 +185,4 @@ if __name__ == "__main__":
             nexus_pulse()
         except Exception as e:
             print(f"[!] Nexus Error: {e}")
-        time.sleep(600) # Pulse every 10 minutes
-
-def trigger_security_counter():
-    try:
-        subprocess.run(["python3", "core_os/scripts/rolling_status_backup.py"], check=False)
-    except:
-        pass
-
+        time.sleep(600)

@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>🔒 NEON PRIVACY Browser</title>
+    <style>
+        * { 
+            box-sizing: border-box; 
+            margin: 0;
+            padding: 0;
+        }
+        body {
+            font-family: 'Courier New', 'Consolas', monospace;
+            background: linear-gradient(135deg, #0a0a2a 0%, #000000 100%);
+            color: #00ffcc;
+            height: 100vh;
+            overflow: hidden;
+            position: relative;
+        }
+        
+        /* Holographic grid background */
+        body::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: 
+                linear-gradient(rgba(0, 255, 204, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 255, 204, 0.03) 1px, transparent 1px);
+            background-size: 20px 20px;
+            z-index: -1;
+        }
+        
+        #browser-container { 
+            display: flex; 
+            flex-direction: column; 
+            height: 100vh; 
+            border: 1px solid rgba(0, 255, 204, 0.3);
+            box-shadow: 0 0 20px rgba(0, 255, 204, 0.1);
+            background: rgba(10, 10, 20, 0.8);
+            backdrop-filter: blur(5px);
+        }
+        
+        #toolbar {
+            background: rgba(5, 5, 15, 0.9);
+            padding: 15px; 
+            display: flex; 
+            gap: 15px;
+            border-bottom: 2px solid rgba(0, 255, 204, 0.5);
+            box-shadow: 0 0 15px rgba(0, 255, 204, 0.2);
+            position: relative;
+        }
+        
+        /* Neon border effects */
+        #toolbar::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            border: 1px solid rgba(0, 255, 204, 0.3);
+            pointer-events: none;
+        }
+        
+        .nav-btn {
+            background: rgba(0, 20, 30, 0.7);
+            color: #00ffcc;
+            border: 1px solid rgba(0, 255, 204, 0.5);
+            padding: 10px 20px; 
+            border-radius: 0;
+            cursor: pointer;
+            font-weight: bold;
+            font-family: 'Courier New', monospace;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            box-shadow: 0 0 10px rgba(0, 255, 204, 0.3);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .nav-btn:hover { 
+            background: rgba(0, 50, 60, 0.9);
+            box-shadow: 0 0 15px rgba(0, 255, 204, 0.7),
+                        inset 0 0 10px rgba(0, 255, 204, 0.5);
+            transform: translateY(-2px);
+        }
+        
+        .nav-btn:active {
+            transform: translateY(1px);
+            box-shadow: 0 0 5px rgba(0, 255, 204, 0.5);
+        }
+        
+        .nav-btn:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+            box-shadow: none;
+        }
+        
+        /* Glowing effect for buttons */
+        .nav-btn::after {
+            content: '';
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            right: -2px;
+            bottom: -2px;
+            border: 1px solid rgba(0, 255, 204, 0.8);
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        
+        .nav-btn:hover::after {
+            opacity: 1;
+        }
+        
+        #url-bar {
+            flex: 1; 
+            padding: 12px 20px; 
+            border-radius: 0;
+            border: 2px solid rgba(0, 255, 204, 0.5);
+            background: rgba(5, 15, 25, 0.8);
+            color: #00ffcc;
+            font-size: 14px;
+            font-family: 'Courier New', monospace;
+            box-shadow: 0 0 10px rgba(0, 255, 204, 0.2);
+        }
+        
+        #url-bar:focus {
+            outline: none;
+            border-color: rgba(0, 255, 204, 0.8);
+            box-shadow: 0 0 15px rgba(0, 255, 204, 0.4);
+        }
+        
+        #go-btn {
+            background: linear-gradient(45deg, #003366, #001122);
+            color: #00ffcc;
+            border: 2px solid rgba(0, 255, 204, 0.7);
+            padding: 10px 25px;
+            border-radius: 0;
+            cursor: pointer;
+            font-weight: bold;
+            font-family: 'Courier New', monospace;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            box-shadow: 0 0 15px rgba(0, 255, 204, 0.4);
+            transition: all 0.3s ease;
+            position: relative;
+        }
+        
+        #go-btn:hover {
+            background: linear-gradient(45deg, #004488, #002244);
+            box-shadow: 0 0 20px rgba(0, 255, 204, 0.8),
+                        inset 0 0 10px rgba(0, 255, 204, 0.5);
+            transform: translateY(-2px);
+        }
+        
+        #go-btn:active {
+            transform: translateY(1px);
+        }
+        
+        /* Scanline effect */
+        #browser-container::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, 
+                transparent 0%, 
+                rgba(0, 255, 204, 0.1) 50%, 
+                transparent 100%);
+            animation: scan 4s linear infinite;
+            z-index: 1000;
+            pointer-events: none;
+        }
+        
+        @keyframes scan {
+            0% { top: 0; }
+            100% { top: 100vh; }
+        }
+        
+        #webview-container { 
+            flex: 1; 
+            display: flex;
+            border-top: 1px solid rgba(0, 255, 204, 0.2);
+        }
+        
+        webview { 
+            flex: 1;
+            width: 100%;
+            height: 100%;
+        }
+        
+        /* Terminal-style status */
+        #status-bar {
+            background: rgba(0, 20, 30, 0.9);
+            color: #00ff99;
+            padding: 5px 15px;
+            font-size: 12px;
+            font-family: 'Courier New', monospace;
+            border-top: 1px solid rgba(0, 255, 204, 0.3);
+            text-align: right;
+        }
+        
+        /* Pulsing glow effect */
+        .pulse {
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { box-shadow: 0 0 5px rgba(0, 255, 204, 0.5); }
+            50% { box-shadow: 0 0 20px rgba(0, 255, 204, 0.8); }
+            100% { box-shadow: 0 0 5px rgba(0, 255, 204, 0.5); }
+        }
+    </style>
+</head>
+<body>
+    <div id="browser-container">
+        <div id="toolbar">
+            <button id="back" class="nav-btn pulse" disabled>← BACK</button>
+            <button id="forward" class="nav-btn pulse" disabled>FORWARD →</button>
+            <button id="refresh" class="nav-btn pulse">↻ REFRESH</button>
+            <input type="text" id="url-bar" placeholder="ENTER DESTINATION..." value="https://duckduckgo.com">
+            <button id="go-btn" class="pulse">ENGAGE</button>
+        </div>
+        <div id="webview-container">
+            <webview 
+                id="webview" 
+                src="https://duckduckgo.com" 
+                partition="persist:private"
+                allowpopups>
+            </webview>
+        </div>
+        <div id="status-bar">SECURE // TRACKING BLOCKED // NEON PROTOCOL ACTIVE</div>
+    </div>
+
+    <script>
+        const webview = document.getElementById('webview');
+        const urlBar = document.getElementById('url-bar');
+        const backBtn = document.getElementById('back');
+        const forwardBtn = document.getElementById('forward');
+        const refreshBtn = document.getElementById('refresh');
+        const goBtn = document.getElementById('go-btn');
+
+        // Navigation controls
+        backBtn.addEventListener('click', () => {
+            if (webview.canGoBack()) webview.goBack();
+        });
+        forwardBtn.addEventListener('click', () => {
+            if (webview.canGoForward()) webview.goForward();
+        });
+        refreshBtn.addEventListener('click', () => webview.reload());
+
+        // URL handling
+        goBtn.addEventListener('click', () => {
+            let url = urlBar.value.trim();
+            if (url) {
+                if (!url.match(/^https?:\/\//)) {
+                    url = 'https://' + url;
+                }
+                webview.src = url;
+            }
+        });
+
+        // Enter key support
+        urlBar.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') goBtn.click();
+        });
+
+        // Update URL bar when navigating
+        webview.addEventListener('did-navigate', (event) => {
+            urlBar.value = event.url;
+        });
+
+        // Update URL bar for page title updates too
+        webview.addEventListener('did-navigate-in-page', (event) => {
+            urlBar.value = event.url;
+        });
+
+        // Update navigation buttons based on history
+        webview.addEventListener('did-navigate', () => {
+            backBtn.disabled = !webview.canGoBack();
+            forwardBtn.disabled = !webview.canGoForward();
+        });
+
+        // Error handling
+        webview.addEventListener('did-fail-load', (event) => {
+            if (event.errorCode !== -3) {
+                console.warn('Navigation failed:', event.errorDescription);
+            }
+        });
+
+        // Block popups
+        webview.addEventListener('new-window', (event) => {
+            event.preventDefault();
+        });
+
+        // Add cyberpunk sound effects (optional)
+        document.querySelectorAll('.nav-btn, #go-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                // In a real implementation, you'd play a sound here
+                console.log('BEEP!');
+            });
+        });
+    </script>
+</body>
+</html>

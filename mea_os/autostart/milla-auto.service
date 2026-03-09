@@ -1,0 +1,16 @@
+[Unit]
+Description=Milla RAYNE — Autonomous AI Core
+After=network.target sound.target
+
+[Service]
+Type=simple
+User=nexus
+WorkingDirectory=/home/nexus/ogdray
+ExecStart=/home/nexus/ogdray/venv/bin/python3 /home/nexus/ogdray/nexus_aio.py
+Restart=on-failure
+RestartSec=10
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target

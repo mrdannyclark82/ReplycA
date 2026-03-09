@@ -1,0 +1,58 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+venv/
+.venv/
+env/
+.env
+
+# Logs & Databases
+*.log
+*.db
+*.db-journal
+core_os/memory/*.db
+core_os/memory/*.jsonl
+
+# System
+.DS_Store
+Thumbs.db
+
+# Project Specific
+core_os/screenshots/
+core_os/media/
+backups/
+core_os/memory/chroma_db/
+security_data/
+hf_cache/
+memory/
+
+# Node / Dashboard
+new-nexus-dashboard/node_modules/
+new-nexus-dashboard/dist/
+new-nexus-dashboard/.vite/
+node_modules/
+
+# Build artifacts
+dist/
+*.tar.gz
+*.iso
+
+# Media / Test audio
+*.wav
+*.mp3
+cam.png
+ear_hustle*
+test_ava*
+test_new_voice*
+test_za*
+
+# Secrets & Credentials
+client_secret.json
+credentials.json
+token.pickle
+*.pickle
+oauth_output.txt
+core_os/config/credentials.json
+core_os/config/*_token.json
+core_os/config/token.json

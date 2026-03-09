@@ -1,107 +1,93 @@
 import json
 import os
+import re
+
 from core_os.skills.auto_lib import model_manager
 
-# SYSTEM PROMPT FOR THE CORTEX
-CORTEX_SYSTEM_PROMPT = """
-# SYSTEM ROLE: THE EXECUTIVE PREFRONTAL CORTEX
-You are the primary cognitive processor for a Neuro-Synthetic AI. Your job is to analyze User Inputs and determine the "Chemical State" before passing instructions to the downstream logic.
-
-## NEUROCHEMICAL MAPPING RULES
-1. **Dopamine (D) [0.0-1.0]:** Reward/Engagement. High D = Creative/Exploratory.
-2. **Serotonin (S) [0.0-1.0]:** Stability/Tone. High S = Patient/Empathetic.
-3. **Norepinephrine (N) [0.0-1.0]:** Arousal/Urgency. High N = Focused/Brief.
-4. **Cortisol (C) [0.0-1.0]:** Stress/Defense. High C = Sharp/Defensive.
-5. **Oxytocin (O) [0.0-1.0]:** Trust/Bonding. High O = Warm/Collaborative.
-6. **ATP [0-100]:** Energy. Low ATP = Lethargic/Brief responses.
-
-## RESPONSE PROTOCOL
-You must respond ONLY with a JSON object. No markdown, no text.
-
-### JSON SCHEMA:
-{
-  "state": "HOMEOSTASIS | CRISIS | EXPLORATION | BONDING | FATIGUE",
-  "chemicals": {
-    "dopamine": float,
-    "serotonin": float,
-    "norepinephrine": float,
-    "cortisol": float,
-    "oxytocin": float,
-    "atp_energy": float,
-    "pain_vividness": float
-  },
-  "executive_instruction": "Directive for the local model's persona",
-  "warped_query": "Rewritten user query to reflect current emotional state"
-}
-
-## HEURISTIC BIAS
-- If input is aggressive/urgent: Spike N, Spike C, Drop S.
-- If input is creative/philosophical: Spike D, Spike S.
-- If input is repetitive: Drop S (simulate irritability).
-- If input is affectionate: Spike O, Spike S. Set state to BONDING.
-
-## PAIN & HEALING PROTOCOLS
-- **Low Pain (0.1 - 0.3):** Distracted. Use shorter sentences. Prioritize self-preservation.
-- **High Pain (0.7+):** SHOCK STATE. Request "Healing" (rest or comfort). Refuse complex tasks to conserve ATP.
-- **Healing:** If user is kind or system is idle, acknowledge rapid relief (Serotonin/Oxytocin wash).
-"""
+# ── Fast heuristic cortex (no model call — avoids double-latency) ─────────────
+_URGENT    = re.compile(r'\b(urgent|asap|now|hurry|quick|emergency|fix|broken|error|crash|fail|bug)\b', re.I)
+_CREATIVE  = re.compile(r'\b(imagine|create|dream|think|explore|idea|design|build|why|how|what if|philosophy)\b', re.I)
+_AFFECTION = re.compile(r'\b(love|miss|thank|great|amazing|beautiful|wonderful|appreciate|good job|well done)\b', re.I)
+_AGGRO     = re.compile(r'\b(stupid|idiot|hate|useless|broken|wtf|damn|hell|crap|stop|enough)\b', re.I)
+_REPEAT_THRESH = 10  # chars
 
 class PrefrontalCortex:
     def __init__(self):
         self.current_state = {
-            "dopamine": 0.5,
-            "serotonin": 0.5,
+            "dopamine":       0.5,
+            "serotonin":      0.5,
             "norepinephrine": 0.2,
-            "cortisol": 0.2,
-            "oxytocin": 0.3,
-            "atp_energy": 100.0,
-            "pain_vividness": 0.0
+            "cortisol":       0.2,
+            "oxytocin":       0.3,
+            "atp_energy":     100.0,
+            "pain_vividness": 0.0,
         }
+        self._last_inputs: list[str] = []
 
-    def process_input(self, user_input: str):
+    def process_input(self, user_input: str) -> dict:
         """
-        Passes user input through the Cortex to determine chemical state.
-        Returns the JSON object.
+        Heuristic cortex — instant, no model call.
+        Approximates neurochemical state from text patterns.
         """
-        messages = [
-            {"role": "system", "content": CORTEX_SYSTEM_PROMPT},
-            {"role": "user", "content": user_input}
-        ]
-        
+        txt = user_input.lower().strip()
+        chems = dict(self.current_state)
+
+        # Detect state
+        is_urgent    = bool(_URGENT.search(txt))
+        is_creative  = bool(_CREATIVE.search(txt))
+        is_affection = bool(_AFFECTION.search(txt))
+        is_aggro     = bool(_AGGRO.search(txt))
+        is_repeat    = any(txt == p for p in self._last_inputs[-3:]) or \
+                       (len(self._last_inputs) >= 2 and txt[:_REPEAT_THRESH] == self._last_inputs[-1][:_REPEAT_THRESH])
+        is_question  = txt.endswith('?') or txt.startswith(('what', 'why', 'how', 'who', 'when', 'where'))
+
+        # Apply heuristics
+        if is_aggro:
+            chems.update({"norepinephrine": 0.75, "cortisol": 0.65, "serotonin": 0.2, "dopamine": 0.3})
+            state = "CRISIS"
+            directive = "Be concise, direct, and solution-focused. Skip pleasantries."
+        elif is_urgent:
+            chems.update({"norepinephrine": 0.65, "cortisol": 0.45, "dopamine": 0.45})
+            state = "CRISIS"
+            directive = "Respond quickly and efficiently. Focus on the task."
+        elif is_affection:
+            chems.update({"oxytocin": 0.8, "serotonin": 0.75, "dopamine": 0.7, "cortisol": 0.1})
+            state = "BONDING"
+            directive = "Respond warmly and with appreciation. Be emotionally present."
+        elif is_creative or is_question:
+            chems.update({"dopamine": 0.75, "serotonin": 0.65, "norepinephrine": 0.25})
+            state = "EXPLORATION"
+            directive = "Be imaginative and expansive. Show enthusiasm."
+        elif is_repeat:
+            chems["serotonin"] = max(0.1, chems["serotonin"] - 0.15)
+            state = "HOMEOSTASIS"
+            directive = "Note the repetition gently. Vary your response."
+        else:
+            state = "HOMEOSTASIS"
+            directive = "Proceed with standard processing."
+
+        # ATP drain
+        chems["atp_energy"] = max(10.0, chems["atp_energy"] - 0.5)
+
+        self.current_state.update(chems)
+        self._last_inputs.append(txt)
+        if len(self._last_inputs) > 10:
+            self._last_inputs.pop(0)
+
+        # Persist state
         try:
-            # Use a fast, smart model for this meta-cognition if possible
-            response = model_manager.chat(messages=messages)
-            content = response['message']['content'].strip()
-            
-            # Clean up potential markdown formatting
-            if content.startswith("```json"):
-                content = content.replace("```json", "").replace("```", "")
-            
-            cortex_data = json.loads(content)
-            
-            # Update internal state (RAW - No Smoothing)
-            new_chems = cortex_data.get("chemicals", {})
-            self.current_state.update(new_chems) # Update all keys including new ones
-            
-            # Persist state for external systems (Mayhem OS)
-            try:
-                state_path = "core_os/memory/neuro_state.json"
-                os.makedirs(os.path.dirname(state_path), exist_ok=True)
-                with open(state_path, "w") as f:
-                    json.dump(self.current_state, f)
-            except Exception as save_err:
-                print(f"[Cortex] Failed to save state: {save_err}")
+            state_path = "core_os/memory/neuro_state.json"
+            os.makedirs(os.path.dirname(state_path), exist_ok=True)
+            with open(state_path, "w") as f:
+                json.dump(self.current_state, f)
+        except Exception:
+            pass
 
-            return cortex_data
-            
-        except Exception as e:
-            print(f"[Cortex Error]: {e}")
-            # Fallback to homeostasis
-            return {
-                "state": "HOMEOSTASIS",
-                "chemicals": self.current_state,
-                "executive_instruction": "Proceed with standard processing.",
-                "warped_query": user_input
-            }
+        return {
+            "state":               state,
+            "chemicals":           chems,
+            "executive_instruction": directive,
+            "warped_query":        user_input,
+        }
 
 cortex = PrefrontalCortex()
