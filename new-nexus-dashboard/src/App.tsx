@@ -24,10 +24,11 @@ import FileBrowser from './components/FileBrowser';
 import GitPanel from './components/GitPanel';
 import BackupPanel from './components/BackupPanel';
 import SwarmPanel from './components/SwarmPanel';
-import { Shield, Terminal as TerminalIcon, Package, Clock, Tv, Calendar, Cpu, Database, Mic, Activity, User, LayoutGrid, Mail, Zap, Eye, ArrowUpCircle, BookOpen, Box, BarChart2, FileText, FolderOpen, GitBranch, Archive, Bell, Search as SearchIcon, X, Bot, ChevronLeft, ChevronRight } from 'lucide-react';
+import UpgradeRadar from './components/UpgradeRadar';
+import { Shield, Terminal as TerminalIcon, Package, Clock, Tv, Calendar, Cpu, Database, Mic, Activity, User, LayoutGrid, Mail, Zap, Eye, ArrowUpCircle, BookOpen, Box, BarChart2, FileText, FolderOpen, GitBranch, Archive, Bell, Search as SearchIcon, X, Bot, Radar, ChevronLeft, ChevronRight } from 'lucide-react';
 import InstallPWA from './components/InstallPWA';
 
-type RightPanel = 'console' | 'skills' | 'cron' | 'cast' | 'calendar' | 'models' | 'memory' | 'voice' | 'feed' | 'persona' | 'gmail' | 'neuro' | 'vision' | 'updates' | 'brief' | 'docker' | 'stats' | 'logs' | 'files' | 'git' | 'backup' | 'swarm';
+type RightPanel = 'console' | 'skills' | 'cron' | 'cast' | 'calendar' | 'models' | 'memory' | 'voice' | 'feed' | 'persona' | 'gmail' | 'neuro' | 'vision' | 'updates' | 'brief' | 'docker' | 'stats' | 'logs' | 'files' | 'git' | 'backup' | 'swarm' | 'radar';
 
 interface Alert { type: string; source: string; text: string; }
 interface SearchResult { source: string; id: string | number; text: string; meta: string; }
@@ -143,6 +144,7 @@ function App() {
     { id: 'git',      label: 'Git',      icon: <GitBranch size={11} />,    color: '#a78bfa' },
     { id: 'backup',   label: 'Backup',   icon: <Archive size={11} />,      color: '#34d399' },
     { id: 'swarm',    label: 'Swarm',    icon: <Bot size={11} />,           color: '#f43f5e' },
+    { id: 'radar',    label: 'Radar',    icon: <Radar size={11} />,         color: 'var(--cyan)' },
   ];
 
   return (
@@ -410,7 +412,7 @@ function App() {
               <div style={{ width: 1, height: 16, background: 'rgba(255,255,255,0.08)', flexShrink: 0, margin: '0 4px' }} />
 
               {/* Group: System */}
-              {(['stats','logs','files','git','docker','backup','updates'] as RightPanel[]).map(id => {
+              {(['stats','logs','files','git','docker','backup','updates','radar'] as RightPanel[]).map(id => {
                 const t = tabs.find(x => x.id === id)!;
                 return (
                   <button key={t.id} onClick={() => setRightPanel(t.id)}
@@ -609,6 +611,11 @@ function App() {
           {rightPanel === 'swarm' && (
             <div className="flex-1 overflow-y-auto min-h-0 p-1">
               <SwarmPanel />
+            </div>
+          )}
+          {rightPanel === 'radar' && (
+            <div className="flex-1 overflow-y-auto min-h-0 p-1">
+              <UpgradeRadar />
             </div>
           )}
 
