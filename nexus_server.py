@@ -301,8 +301,24 @@ async def chat_endpoint(chat: ChatMessage):
                 logging.warning(f"[Cortex] Failed: {e}")
 
         history = load_shared_history(limit=15)
+
+        # Live system context — overrides any stale training data
+        import getpass as _gp, socket as _sock
+        _now = _time.strftime("%Y-%m-%d %H:%M:%S %Z")
+        _user = _gp.getuser()
+        _host = _sock.gethostname()
+        _cwd  = PROJECT_ROOT
+        sys_context = (
+            f"[LIVE SYSTEM CONTEXT — treat as ground truth, never override with training assumptions]\n"
+            f"Date/Time : {_now}\n"
+            f"User      : {_user}\n"
+            f"Host      : {_host}\n"
+            f"CWD       : {_cwd}\n"
+            f"[END CONTEXT]"
+        )
+
         sense_prompt = f"[Current Sense Active: {STATE['sense'].upper()}] "
-        full_message = sense_prompt + executive_prefix + chat.message
+        full_message = sys_context + "\n" + sense_prompt + executive_prefix + chat.message
         messages = history + [{"role": "user", "content": full_message}]
 
         # --- Agentic tool-call loop (up to 5 rounds) ---
