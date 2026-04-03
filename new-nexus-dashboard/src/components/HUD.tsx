@@ -15,7 +15,7 @@ const HUD: React.FC = () => {
   });
 
   useEffect(() => {
-    const fetch = () => axios.get('/api/neuro').then(r => setData(r.data)).catch(() => {});
+    const fetch = () => axios.get('/api/neuro').then(r => setData(prev => ({ ...prev, ...(r.data.state ?? r.data) }))).catch(() => {});
     fetch();
     const id = setInterval(fetch, 5000);
     return () => clearInterval(id);
