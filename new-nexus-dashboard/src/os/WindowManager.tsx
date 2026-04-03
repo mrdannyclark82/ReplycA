@@ -24,6 +24,7 @@ interface WindowState {
   docked: boolean;
   dockedEdge?: 'left' | 'right' | 'bottom';
   pinned: boolean;
+  pip: boolean;
   zIndex: number;
 }
 
@@ -225,6 +226,7 @@ export function useWindowManager() {
         minimized: false,
         docked: layout?.docked ?? false,
         pinned: layout?.pinned ?? false,
+        pip: false,
         zIndex: ++zTop.current,
       }];
     });
