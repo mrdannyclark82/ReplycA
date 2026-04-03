@@ -137,19 +137,20 @@ export default function AppsMenu({ onOpen }: Props) {
           onClick={() => setOpen(false)}
         >
           <div
-            onClick={e => e.stopPropagation()}
-            style={{
-              position: 'absolute', top: '50%', left: '50%',
-              transform: 'translate(-50%, -50%)',
-              width: '680px', maxWidth: '92vw',
-              maxHeight: '78vh',
-              background: 'rgba(8,10,16,0.97)', backdropFilter: 'blur(24px)',
-              border: '1px solid rgba(168,85,247,0.2)', borderRadius: '18px',
-              boxShadow: '0 32px 80px rgba(0,0,0,0.9), 0 0 0 1px rgba(168,85,247,0.06)',
-              display: 'flex', flexDirection: 'column',
-              overflow: 'hidden',
-              fontFamily: "'JetBrains Mono', monospace",
-            }}
+          onClick={e => e.stopPropagation()}
+          style={{
+            position: 'fixed',
+            top: '50%', left: '50%',
+            transform: 'translate(-50%, -50%)',
+            width: '680px', maxWidth: '92vw',
+            height: '70vh', maxHeight: '600px',
+            background: 'rgba(8,10,16,0.97)', backdropFilter: 'blur(24px)',
+            border: '1px solid rgba(168,85,247,0.2)', borderRadius: '18px',
+            boxShadow: '0 32px 80px rgba(0,0,0,0.9), 0 0 0 1px rgba(168,85,247,0.06)',
+            display: 'flex', flexDirection: 'column',
+            overflow: 'hidden',
+            fontFamily: "'JetBrains Mono', monospace",
+          }}
           >
             {/* Header */}
             <div style={{
@@ -212,6 +213,7 @@ export default function AppsMenu({ onOpen }: Props) {
               gridTemplateColumns: 'repeat(auto-fill, minmax(110px, 1fr))',
               gap: '8px', padding: '16px 20px 20px',
               overflowY: 'auto',
+              flex: 1,
             }}>
               {filtered.map(app => (
                 <button

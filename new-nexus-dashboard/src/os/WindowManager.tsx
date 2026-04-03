@@ -35,6 +35,7 @@ interface WindowManagerProps {
   onMinimize: (id: string) => void;
   onDock: (id: string) => void;
   onPin: (id: string) => void;
+  onPip: (id: string) => void;
   onMove: (id: string, x: number, y: number) => void;
   onResize: (id: string, w: number, h: number, x: number, y: number) => void;
 }
@@ -47,6 +48,7 @@ function OsWindow({
   onMinimize,
   onDock,
   onPin,
+  onPip,
   onMove,
   onResize,
 }: {
@@ -56,6 +58,7 @@ function OsWindow({
   onMinimize: (id: string) => void;
   onDock: (id: string) => void;
   onPin: (id: string) => void;
+  onPip: (id: string) => void;
   onMove: (id: string, x: number, y: number) => void;
   onResize: (id: string, w: number, h: number, x: number, y: number) => void;
 }) {
@@ -81,25 +84,28 @@ function OsWindow({
       <div style={{
         width: '100%', height: '100%',
         display: 'flex', flexDirection: 'column',
-        background: 'rgba(8,12,20,0.92)',
+        background: win.pip ? 'rgba(4,8,14,0.97)' : 'rgba(8,12,20,0.92)',
         backdropFilter: 'blur(20px)',
-        border: `1px solid ${win.pinned ? 'rgba(168,85,247,0.4)' : 'rgba(6,182,212,0.18)'}`,
+        border: `1px solid ${win.pip ? 'rgba(45,212,191,0.5)' : win.pinned ? 'rgba(168,85,247,0.4)' : 'rgba(6,182,212,0.18)'}`,
         borderRadius: '10px',
-        boxShadow: `0 24px 64px rgba(0,0,0,0.7), 0 0 0 1px rgba(255,255,255,0.04), inset 0 1px 0 rgba(255,255,255,0.06)`,
+        boxShadow: win.pip
+          ? '0 8px 32px rgba(0,0,0,0.9), 0 0 0 1px rgba(45,212,191,0.12)'
+          : '0 24px 64px rgba(0,0,0,0.7), 0 0 0 1px rgba(255,255,255,0.04), inset 0 1px 0 rgba(255,255,255,0.06)',
         overflow: 'hidden',
       }}>
         {/* Title bar */}
         <div className="os-window__titlebar" style={{
-          height: '34px', minHeight: '34px',
+          height: win.pip ? '24px' : '34px',
+          minHeight: win.pip ? '24px' : '34px',
           display: 'flex', alignItems: 'center',
-          padding: '0 10px',
+          padding: '0 8px',
           background: 'rgba(255,255,255,0.03)',
           borderBottom: '1px solid rgba(255,255,255,0.06)',
           cursor: 'grab', userSelect: 'none',
-          gap: '8px',
+          gap: '6px',
         }}>
           {/* Traffic light buttons */}
-          <div style={{ display: 'flex', gap: '6px', marginRight: '4px' }}>
+          <div style={{ display: 'flex', gap: '6px', marginRight: '2px' }}>
             {[
               { key: 'close', color: '#f43f5e', action: () => onClose(win.id) },
               { key: 'min',   color: '#f59e0b', action: () => onMinimize(win.id) },
@@ -123,28 +129,53 @@ function OsWindow({
           </div>
 
           {/* Icon + title */}
-          {win.icon && <span style={{ fontSize: '12px' }}>{win.icon}</span>}
+          {win.icon && !win.pip && <span style={{ fontSize: '12px' }}>{win.icon}</span>}
           <span style={{
-            fontSize: '10px', color: 'rgba(255,255,255,0.5)',
+            fontSize: win.pip ? '9px' : '10px',
+            color: win.pip ? 'rgba(45,212,191,0.6)' : 'rgba(255,255,255,0.5)',
             letterSpacing: '0.12em', textTransform: 'uppercase',
             flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
           }}>
-            {win.title}
+            {win.pip ? `◈ ${win.title}` : win.title}
           </span>
 
+          {/* PiP toggle — only for terminal/youtube */}
+          {(win.id === 'terminal' || win.id === 'youtube') && (
+            <button
+              onMouseDown={e => e.stopPropagation()}
+              onClick={() => onPip(win.id)}
+              title={win.pip ? 'Exit PiP' : 'Enter PiP'}
+              style={{
+                background: win.pip ? 'rgba(45,212,191,0.15)' : 'none',
+                border: win.pip ? '1px solid rgba(45,212,191,0.4)' : 'none',
+                borderRadius: '4px',
+                cursor: 'pointer', padding: '1px 4px',
+                color: win.pip ? 'rgba(45,212,191,0.9)' : 'rgba(255,255,255,0.2)',
+                fontSize: '9px', letterSpacing: '0.05em',
+                display: 'flex', alignItems: 'center',
+                transition: 'all 0.15s ease',
+                fontFamily: 'inherit',
+              }}
+            >
+              {win.pip ? '⊡' : '⊟'}
+            </button>
+          )}
+
           {/* Pin toggle */}
-          <button
-            onMouseDown={e => e.stopPropagation()}
-            onClick={() => onPin(win.id)}
-            style={{
-              background: 'none', border: 'none', cursor: 'pointer', padding: '2px',
-              color: win.pinned ? 'rgba(168,85,247,0.8)' : 'rgba(255,255,255,0.2)',
-              display: 'flex', alignItems: 'center',
-              transition: 'color 0.15s ease',
-            }}
-          >
-            {win.pinned ? <PinOff size={10} /> : <Pin size={10} />}
-          </button>
+          {!win.pip && (
+            <button
+              onMouseDown={e => e.stopPropagation()}
+              onClick={() => onPin(win.id)}
+              style={{
+                background: 'none', border: 'none', cursor: 'pointer', padding: '2px',
+                color: win.pinned ? 'rgba(168,85,247,0.8)' : 'rgba(255,255,255,0.2)',
+                display: 'flex', alignItems: 'center',
+                transition: 'color 0.15s ease',
+              }}
+            >
+              {win.pinned ? <PinOff size={10} /> : <Pin size={10} />}
+            </button>
+          )}
         </div>
 
         {/* Content */}
@@ -156,7 +187,7 @@ function OsWindow({
   );
 }
 
-export function WindowManager({ windows, onClose, onFocus, onMinimize, onDock, onPin, onMove, onResize }: WindowManagerProps) {
+export function WindowManager({ windows, onClose, onFocus, onMinimize, onDock, onPin, onPip, onMove, onResize }: WindowManagerProps) {
   return (
     <>
       {windows.map(win => (
@@ -168,6 +199,7 @@ export function WindowManager({ windows, onClose, onFocus, onMinimize, onDock, o
           onMinimize={onMinimize}
           onDock={onDock}
           onPin={onPin}
+          onPip={onPip}
           onMove={onMove}
           onResize={onResize}
         />
@@ -237,9 +269,20 @@ export function useWindowManager() {
   const minimize   = useCallback((id: string) => setWindows(p => p.map(w => w.id === id ? { ...w, minimized: true } : w)), []);
   const toggleDock = useCallback((id: string) => setWindows(p => p.map(w => w.id === id ? { ...w, docked: !w.docked } : w)), []);
   const togglePin  = useCallback((id: string) => setWindows(p => p.map(w => w.id === id ? { ...w, pinned: !w.pinned } : w)), []);
+  const togglePip  = useCallback((id: string) => setWindows(p => p.map(w => {
+    if (w.id !== id) return w;
+    if (w.pip) {
+      return { ...w, pip: false, pinned: false, width: w.width < 280 ? 480 : w.width, height: w.height < 150 ? 360 : w.height };
+    }
+    const dw = window.innerWidth;
+    const dh = window.innerHeight - 108;
+    const pw = id === 'youtube' ? 320 : 360;
+    const ph = id === 'youtube' ? 196 : 200;
+    return { ...w, pip: true, pinned: true, width: pw, height: ph, x: dw - pw - 16, y: dh - ph - 8, zIndex: 9990 };
+  })), []);
   const move       = useCallback((id: string, x: number, y: number) => setWindows(p => p.map(w => w.id === id ? { ...w, x, y } : w)), []);
   const resize     = useCallback((id: string, width: number, height: number, x: number, y: number) =>
     setWindows(p => p.map(w => w.id === id ? { ...w, width, height, x, y } : w)), []);
 
-  return { windows, open, close, focus, minimize, toggleDock, togglePin, move, resize };
+  return { windows, open, close, focus, minimize, toggleDock, togglePin, togglePip, move, resize };
 }

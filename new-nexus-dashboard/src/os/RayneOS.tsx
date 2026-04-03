@@ -82,7 +82,7 @@ export default function RayneOS() {
         <WindowManager
           windows={wm.windows}
           onClose={wm.close} onFocus={wm.focus} onMinimize={wm.minimize}
-          onDock={wm.toggleDock} onPin={wm.togglePin} onMove={wm.move} onResize={wm.resize}
+          onDock={wm.toggleDock} onPin={wm.togglePin} onPip={wm.togglePip} onMove={wm.move} onResize={wm.resize}
         />
         <NeuroHud />
       </div>
