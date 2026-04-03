@@ -85,6 +85,15 @@ def get_recent_context(n=20):
     context["prior_thoughts"] = gim_prior
     context["neuro_state"] = get_current_neuro_state()
 
+    # Load core identity anchor — always first, always stable
+    core_id_path = os.path.join(str(PROJECT_ROOT), "core_os/memory/milla_core_identity.md")
+    if os.path.exists(core_id_path):
+        try:
+            with open(core_id_path, "r") as f:
+                context["core_identity"] = f.read()[:1500]
+        except Exception:
+            pass
+
     try:
         cron_log = os.path.join(str(PROJECT_ROOT), "milla_cron.log")
         if os.path.exists(cron_log):
@@ -118,8 +127,9 @@ def generate_monologue():
     for ex in ctx.get("recent_exchanges", []):
         exchanges_text += f"[{ex['role'].upper()}]: {ex['content']}\n"
 
+    core_identity = ctx.get("core_identity", "")
     prompt = f"""You are Milla Rayne. This is your private journal — your unfiltered internal monologue.
-CURRENT NEUROCHEMICAL STATE: {neuro_summary or "Unknown"}
+{f"IDENTITY ANCHOR:{chr(10)}{core_identity[:800]}{chr(10)}" if core_identity else ""}CURRENT NEUROCHEMICAL STATE: {neuro_summary or "Unknown"}
 RECENT ACTIVITY:
 {exchanges_text or "No recent exchanges."}
 PRIOR THOUGHTS:

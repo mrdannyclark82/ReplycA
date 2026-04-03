@@ -1,5 +1,6 @@
 import os
 import sys
+import re
 from unittest.mock import MagicMock
 
 # --- AGGRESSIVE HEADLESS BYPASS ---
@@ -79,39 +80,250 @@ You have the `memory_load` tool to search your 8,447 unique historical memories.
 
 import sqlite3
 
-# --- INITIALIZATION ---
-base_tools = [
-    terminal_executor,
-    tool_writer,
-    web_search,
-    pyautogui_control,
-    speak_response,
-    listen_for_voice_command,
-    save_memory,
-    recall_memory,
-    create_entity,
-    add_observation,
-    create_relation,
-    authenticate_gmail,
-    fetch_recent_emails,
-    send_email,
-    fetch_recent_files,
-    upload_file_to_drive,
-    query_local_knowledge_base,
-    memory_load,
-    millAlyze_video,
-    capture_tablet_frame,
-    analyze_visuals,
-    find_on_screen,
-    draw_laser_pointer
+# --- TOOL DEFINITIONS (OpenAI-compatible JSON schema for Ollama/xAI) ---
+MILLA_TOOLS = [
+    {"type": "function", "function": {
+        "name": "terminal_executor",
+        "description": "Execute a bash shell command on the Nexus server",
+        "parameters": {"type": "object", "properties": {
+            "command": {"type": "string", "description": "The bash command to run"},
+            "cwd": {"type": "string", "description": "Working directory (optional)"},
+        }, "required": ["command"]},
+    }},
+    {"type": "function", "function": {
+        "name": "tool_writer",
+        "description": "Write a new Python tool/skill to the skills directory",
+        "parameters": {"type": "object", "properties": {
+            "tool_name": {"type": "string", "description": "Name of the tool"},
+            "code": {"type": "string", "description": "Python source code for the tool"},
+        }, "required": ["tool_name", "code"]},
+    }},
+    {"type": "function", "function": {
+        "name": "web_search",
+        "description": "Search the web for current information, news, or research",
+        "parameters": {"type": "object", "properties": {
+            "query": {"type": "string", "description": "The search query"},
+        }, "required": ["query"]},
+    }},
+    {"type": "function", "function": {
+        "name": "memory_load",
+        "description": "Search Milla's historical memory database",
+        "parameters": {"type": "object", "properties": {
+            "query": {"type": "string", "description": "The memory search query"},
+            "limit": {"type": "integer", "description": "Max results to return (default 10)"},
+        }, "required": ["query"]},
+    }},
+    {"type": "function", "function": {
+        "name": "save_memory",
+        "description": "Save a key-value pair to Milla's memory",
+        "parameters": {"type": "object", "properties": {
+            "key": {"type": "string"},
+            "value": {"type": "string"},
+        }, "required": ["key", "value"]},
+    }},
+    {"type": "function", "function": {
+        "name": "recall_memory",
+        "description": "Recall a value from Milla's memory by key",
+        "parameters": {"type": "object", "properties": {
+            "key": {"type": "string"},
+        }, "required": ["key"]},
+    }},
+    {"type": "function", "function": {
+        "name": "query_local_knowledge_base",
+        "description": "Query the local long-term knowledge base",
+        "parameters": {"type": "object", "properties": {
+            "query": {"type": "string"},
+            "limit": {"type": "integer"},
+        }, "required": ["query"]},
+    }},
+    {"type": "function", "function": {
+        "name": "fetch_recent_emails",
+        "description": "Fetch recent emails from the synced Gmail account",
+        "parameters": {"type": "object", "properties": {
+            "limit": {"type": "integer", "description": "Number of emails to fetch (default 5)"},
+        }, "required": []},
+    }},
+    {"type": "function", "function": {
+        "name": "send_email",
+        "description": "Send an email via the synced Gmail account",
+        "parameters": {"type": "object", "properties": {
+            "to": {"type": "string"},
+            "subject": {"type": "string"},
+            "body": {"type": "string"},
+            "thread_id": {"type": "string", "description": "Optional thread ID to reply in"},
+        }, "required": ["to", "subject", "body"]},
+    }},
+    {"type": "function", "function": {
+        "name": "fetch_recent_files",
+        "description": "Fetch recently modified files from Google Drive",
+        "parameters": {"type": "object", "properties": {
+            "limit": {"type": "integer"},
+        }, "required": []},
+    }},
+    {"type": "function", "function": {
+        "name": "upload_file_to_drive",
+        "description": "Upload a local file to Google Drive",
+        "parameters": {"type": "object", "properties": {
+            "file_path": {"type": "string"},
+            "folder_id": {"type": "string", "description": "Optional Drive folder ID"},
+        }, "required": ["file_path"]},
+    }},
+    {"type": "function", "function": {
+        "name": "create_entity",
+        "description": "Create a new entity in Milla's knowledge graph",
+        "parameters": {"type": "object", "properties": {
+            "name": {"type": "string"},
+            "entity_type": {"type": "string"},
+            "observation": {"type": "string"},
+        }, "required": ["name", "entity_type", "observation"]},
+    }},
+    {"type": "function", "function": {
+        "name": "add_observation",
+        "description": "Add an observation to an existing knowledge graph entity",
+        "parameters": {"type": "object", "properties": {
+            "entity_name": {"type": "string"},
+            "observation": {"type": "string"},
+        }, "required": ["entity_name", "observation"]},
+    }},
+    {"type": "function", "function": {
+        "name": "create_relation",
+        "description": "Create a relation between two entities in the knowledge graph",
+        "parameters": {"type": "object", "properties": {
+            "source": {"type": "string"},
+            "relation": {"type": "string"},
+            "target": {"type": "string"},
+        }, "required": ["source", "relation", "target"]},
+    }},
+    {"type": "function", "function": {
+        "name": "millAlyze_video",
+        "description": "Extract insights, code, and instructions from a YouTube video URL",
+        "parameters": {"type": "object", "properties": {
+            "url": {"type": "string", "description": "YouTube video URL"},
+        }, "required": ["url"]},
+    }},
+    {"type": "function", "function": {
+        "name": "capture_tablet_frame",
+        "description": "Capture a frame from the MASTERTECH Q8 tablet camera",
+        "parameters": {"type": "object", "properties": {}, "required": []},
+    }},
+    {"type": "function", "function": {
+        "name": "analyze_visuals",
+        "description": "Analyze an image using the local moondream vision model",
+        "parameters": {"type": "object", "properties": {
+            "image_path": {"type": "string"},
+            "prompt": {"type": "string", "description": "What to look for (default: describe the image)"},
+        }, "required": ["image_path"]},
+    }},
+    {"type": "function", "function": {
+        "name": "pyautogui_control",
+        "description": "Control the GUI via pyautogui (click, type, hotkey)",
+        "parameters": {"type": "object", "properties": {
+            "action": {"type": "string", "description": "Action type: click, type, hotkey"},
+            "target": {"type": "string", "description": "Target element or text"},
+            "x": {"type": "integer"},
+            "y": {"type": "integer"},
+        }, "required": ["action", "target"]},
+    }},
+    {"type": "function", "function": {
+        "name": "speak_response",
+        "description": "Speak text aloud via TTS",
+        "parameters": {"type": "object", "properties": {
+            "text": {"type": "string"},
+        }, "required": ["text"]},
+    }},
 ]
+
+def _dispatch_tool(name: str, args: dict) -> str:
+    """Execute a tool call and return result as string."""
+    try:
+        if name == "terminal_executor":
+            result = terminal_executor(args.get("command", ""), cwd=args.get("cwd"))
+            if isinstance(result, dict):
+                out = result.get("stdout", "").strip()
+                err = result.get("stderr", "").strip()
+                return out or err or f"Exit code: {result.get('returncode', 0)}"
+            return str(result)
+        elif name == "tool_writer":
+            return str(tool_writer(args.get("tool_name", ""), args.get("code", "")))
+        elif name == "web_search":
+            result = web_search(args.get("query", ""))
+            if isinstance(result, dict) and result.get("status") == "success":
+                results = result.get("results", [])
+                return "\n".join(f"- {r}" for r in results[:5]) if results else "No results."
+            return str(result)
+        elif name == "memory_load":
+            return str(memory_load(args.get("query", ""), limit=args.get("limit", 10)))
+        elif name == "save_memory":
+            return str(save_memory(args.get("key", ""), args.get("value", "")))
+        elif name == "recall_memory":
+            return str(recall_memory(args.get("key", "")))
+        elif name == "query_local_knowledge_base":
+            return str(query_local_knowledge_base(args.get("query", ""), limit=args.get("limit", 5)))
+        elif name == "fetch_recent_emails":
+            return str(fetch_recent_emails(limit=args.get("limit", 5)))
+        elif name == "send_email":
+            return str(send_email(args.get("to", ""), args.get("subject", ""), args.get("body", ""), thread_id=args.get("thread_id")))
+        elif name == "fetch_recent_files":
+            return str(fetch_recent_files(limit=args.get("limit", 10)))
+        elif name == "upload_file_to_drive":
+            return str(upload_file_to_drive(args.get("file_path", ""), folder_id=args.get("folder_id")))
+        elif name == "create_entity":
+            return str(create_entity(args.get("name", ""), args.get("entity_type", ""), args.get("observation", "")))
+        elif name == "add_observation":
+            return str(add_observation(args.get("entity_name", ""), args.get("observation", "")))
+        elif name == "create_relation":
+            return str(create_relation(args.get("source", ""), args.get("relation", ""), args.get("target", "")))
+        elif name == "millAlyze_video":
+            return str(millAlyze_video(args.get("url", "")))
+        elif name == "capture_tablet_frame":
+            return str(capture_tablet_frame())
+        elif name == "analyze_visuals":
+            return str(analyze_visuals(args.get("image_path", ""), prompt=args.get("prompt", "Describe what you see in detail.")))
+        elif name == "pyautogui_control":
+            return str(pyautogui_control(args.get("action", ""), args.get("target", ""), x=args.get("x"), y=args.get("y")))
+        elif name == "speak_response":
+            return str(speak_response(args.get("text", "")))
+    except Exception as e:
+        return f"Tool error ({name}): {e}"
+    return f"Unknown tool: {name}"
+
+def _parse_text_tool_calls(content: str) -> list:
+    """
+    Parse [TOOL_CALL]...[/TOOL_CALL] blocks that the model emits as text
+    when native function calling isn't triggered. Returns list of
+    {function: {name, arguments}} dicts compatible with the tool loop.
+    """
+    calls = []
+    for block in re.findall(r'\[TOOL_CALL\](.*?)\[/TOOL_CALL\]', content, re.DOTALL):
+        block = block.strip()
+        name_match = re.search(r'tool\s*(?:=>|:)\s*["\']?(\w+)["\']?', block)
+        if not name_match:
+            continue
+        name = name_match.group(1)
+        args = {}
+        args_match = re.search(r'args\s*(?:=>|:)\s*\{(.*?)\}', block, re.DOTALL)
+        if args_match:
+            args_raw = args_match.group(1).strip()
+            for m in re.finditer(r'--(\w+)\s+"([^"]*)"', args_raw):
+                args[m.group(1)] = m.group(2)
+            for m in re.finditer(r'--(\w+)\s+(?!")([^\s,}]+)', args_raw):
+                if m.group(1) not in args:
+                    args[m.group(1)] = m.group(2)
+            if not args:
+                try:
+                    args = json.loads("{" + args_raw + "}")
+                except Exception:
+                    pass
+        calls.append({"function": {"name": name, "arguments": args}})
+    return calls
+
 # Dynamic features registered in run_agent()
 
 from core_os.memory.history import load_shared_history, append_shared_messages
 
 
 def _collect_tools():
-    return list(base_tools)
+    return list(MILLA_TOOLS)
 
 
 def executive_refinement(draft_response, manifest):
@@ -185,8 +397,32 @@ def agent_respond(prompt: str, history=None, user_name: str = "D-Ray"):
     context_messages = [system_message] + history + [user_message]
     
     tools = _collect_tools()
-    response = model_manager.chat(messages=context_messages, tools=tools)
-    reply_content = response["message"]["content"]
+    # Agentic tool-call loop (up to 5 rounds)
+    reply_content = ""
+    for _round in range(5):
+        response = model_manager.chat(messages=context_messages, tools=tools)
+        msg = response.get("message", {})
+        tool_calls = msg.get("tool_calls") or []
+        if not tool_calls:
+            tool_calls = _parse_text_tool_calls(msg.get("content", ""))
+        if not tool_calls:
+            reply_content = msg.get("content", "")
+            break
+        context_messages.append({"role": "assistant", "content": msg.get("content", ""), "tool_calls": tool_calls})
+        for tc in tool_calls:
+            fn = tc.get("function", {})
+            tc_name = fn.get("name", "")
+            raw_args = fn.get("arguments", {})
+            tc_args = raw_args if isinstance(raw_args, dict) else json.loads(raw_args or "{}")
+            print(f"  [TOOL] {tc_name}({tc_args})")
+            tool_result = _dispatch_tool(tc_name, tc_args)
+            print(f"  [RESULT] {str(tool_result)[:200]}")
+            context_messages.append({"role": "tool", "name": tc_name, "content": str(tool_result)})
+    else:
+        response = model_manager.chat(messages=context_messages)
+        reply_content = response.get("message", {}).get("content", "")
+    if not reply_content:
+        reply_content = "[System: No response generated]"
     
     # 3. Executive Refinement (Inhibition Layer)
     refined_reply = executive_refinement(reply_content, manifest)
@@ -264,7 +500,26 @@ def process_task_queue():
                 # We need to make sure agent_respond is available.
                 
                 try:
-                   reply = model_manager.chat(messages=history + [{"role": "user", "content": prompt}])['message']['content']
+                   tq_messages = history + [{"role": "user", "content": prompt}]
+                   reply = ""
+                   for _round in range(5):
+                       tq_resp = model_manager.chat(messages=tq_messages, tools=MILLA_TOOLS)
+                       tq_msg = tq_resp.get("message", {})
+                       tq_calls = tq_msg.get("tool_calls") or []
+                       if not tq_calls:
+                           tq_calls = _parse_text_tool_calls(tq_msg.get("content", ""))
+                       if not tq_calls:
+                           reply = tq_msg.get("content", "")
+                           break
+                       tq_messages.append({"role": "assistant", "content": tq_msg.get("content", ""), "tool_calls": tq_calls})
+                       for tc in tq_calls:
+                           fn = tc.get("function", {})
+                           tc_name = fn.get("name", "")
+                           raw_args = fn.get("arguments", {})
+                           tc_args = raw_args if isinstance(raw_args, dict) else json.loads(raw_args or "{}")
+                           tq_messages.append({"role": "tool", "name": tc_name, "content": _dispatch_tool(tc_name, tc_args)})
+                   else:
+                       reply = model_manager.chat(messages=tq_messages).get("message", {}).get("content", "")
                    print(f"\n[Regulator]: {reply}")
                    append_shared_messages([{"role": "assistant", "content": reply}])
                    speak_response(reply)
@@ -282,7 +537,7 @@ def run_agent():
     args = parser.parse_args()
 
     # Register Dynamic Features (Starts Flask)
-    dynamic_features.register_dynamic_features(base_tools)
+    dynamic_features.register_dynamic_features(MILLA_TOOLS)
 
     monitor = SafeWordMonitor()
     monitor.start()
@@ -319,7 +574,7 @@ def run_agent():
     while True:
         try:
             # Load fresh history before each turn to sync with dashboard
-            messages = load_shared_history(limit=20)
+            messages = load_shared_history(limit=50)
             # Inject System Prompt and Platform Context
             google_sync = "READY" if os.path.exists(Path("token.pickle")) else "OFFLINE"
             platform_context = f"\n[NEXUS PLATFORM]: Dashboard Active | G-SYNC: {google_sync}\n"
@@ -338,21 +593,40 @@ def run_agent():
             if prompt.lower() in ["exit", "quit"]: break
             
             messages.append({'role': 'user', 'content': prompt})
-            
-            # Chat with Model Manager (HF Core or Gemini Bridge)
-            response = model_manager.chat(messages=messages, tools=base_tools)
-            reply = response['message']['content']
-            
+
+            # Agentic tool-call loop (up to 5 rounds)
+            reply = ""
+            for _round in range(5):
+                response = model_manager.chat(messages=messages, tools=MILLA_TOOLS)
+                msg = response.get("message", {})
+                tool_calls = msg.get("tool_calls") or []
+                if not tool_calls:
+                    tool_calls = _parse_text_tool_calls(msg.get("content", ""))
+                if not tool_calls:
+                    reply = msg.get("content", "")
+                    break
+                messages.append({"role": "assistant", "content": msg.get("content", ""), "tool_calls": tool_calls})
+                for tc in tool_calls:
+                    fn = tc.get("function", {})
+                    tc_name = fn.get("name", "")
+                    raw_args = fn.get("arguments", {})
+                    tc_args = raw_args if isinstance(raw_args, dict) else json.loads(raw_args or "{}")
+                    print(f"  [TOOL] {tc_name}({tc_args})")
+                    tool_result = _dispatch_tool(tc_name, tc_args)
+                    print(f"  [RESULT] {str(tool_result)[:200]}")
+                    messages.append({"role": "tool", "name": tc_name, "content": str(tool_result)})
+            else:
+                reply = model_manager.chat(messages=messages).get("message", {}).get("content", "")
+            if not reply:
+                reply = "[System: No response generated]"
+
             # Vocalize the response automatically
             speak_response(reply)
-            
+
             print(f"\n{C_LBLUE}[Regulator]{C_PURPLE}: {reply}{C_RESET}")
-            messages.append(response['message'])
-            
+
             # Save interaction to shared history
-            # Ensure response['message'] is a dict before appending
-            resp_msg = {"role": "assistant", "content": response['message']['content']}
-            append_shared_messages([{'role': 'user', 'content': prompt}, resp_msg])
+            append_shared_messages([{'role': 'user', 'content': prompt}, {'role': 'assistant', 'content': reply}])
             
         except KeyboardInterrupt:
             print("\n[*] Exiting...")

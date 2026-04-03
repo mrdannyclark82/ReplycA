@@ -10,7 +10,7 @@ except Exception:
 # Ensure parent directory is in path for core_os imports
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../../')))
 
-from core_os.skills.milla_vision import capture_tablet_frame, capture_dome_frame, analyze_visuals
+from core_os.skills.milla_vision import capture_vla_frame, analyze_visuals
 from core_os.actions import terminal_executor
 
 class ActionDispatcher:
@@ -30,11 +30,8 @@ class ActionDispatcher:
         """
         print(f"[*] VLA: Initiating goal: '{goal}'")
         
-        # 1. PEER: Capture current state (Try Dome first, then Tablet)
-        frame_path = capture_dome_frame()
-        if not frame_path:
-            frame_path = capture_tablet_frame()
-            
+        # 1. PEER: Capture current state using the shared vision fallback chain.
+        frame_path = capture_vla_frame()
         if not frame_path:
             return "ERROR: Vision capture failed. Hands are tied."
 
@@ -72,7 +69,9 @@ class ActionDispatcher:
 
         # 4. VERIFY: Did it work?
         time.sleep(1) 
-        verification_frame = capture_dome_frame() or capture_tablet_frame()
+        verification_frame = capture_vla_frame()
+        if not verification_frame:
+            return "VLA: Action executed, but verification vision was unavailable."
         verify_prompt = f"Did the action '{goal}' succeed at coordinates ({x}, {y})? Answer 'YES' or 'NO' and explain."
         verification_result = analyze_visuals(verification_frame, prompt=verify_prompt)
 

@@ -19,7 +19,7 @@ from google_auth_oauthlib.flow import Flow
 from google.auth.transport.requests import Request as GoogleRequest
 
 # Add project root to path
-PROJECT_ROOT = os.path.dirname(os.path.abspath(__file__))
+PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 if PROJECT_ROOT not in sys.path:
     sys.path.insert(0, PROJECT_ROOT)
 
@@ -125,7 +125,7 @@ SCOPES = [
 @app.get("/api/neuro")
 async def get_neuro_state():
     try:
-        with open("core_os/memory/neuro_state.json", "r") as f:
+        with open(os.path.join(PROJECT_ROOT, "core_os", "memory", "neuro_state.json"), "r") as f:
             data = json.load(f)
             data["sense"] = STATE["sense"]
             data["google_auth"] = os.path.exists(TOKEN_PICKLE)
@@ -232,6 +232,87 @@ async def chat_endpoint(chat: ChatMessage):
                 },
             },
         },
+        {
+            "type": "function",
+            "function": {
+                "name": "desktop_context_snapshot",
+                "description": "Capture desktop GUI context, OCR, focus regions, and optional terminal log excerpts",
+                "parameters": {
+                    "type": "object",
+                    "properties": {
+                        "prompt": {"type": "string", "description": "What visual context to extract"},
+                        "vision_profile": {
+                            "type": "string",
+                            "description": "bitvla, vlm-3r, or v2drop profile for UI reasoning",
+                        },
+                        "terminal_log_path": {
+                            "type": "string",
+                            "description": "Optional terminal log file to tail alongside the screenshot",
+                        },
+                        "tail_lines": {"type": "integer", "description": "How many terminal log lines to include"},
+                        "include_ocr": {"type": "boolean", "description": "Whether to include OCR text"},
+                        "use_focus_regions": {"type": "boolean", "description": "Whether to analyze focused regions"},
+                    },
+                    "required": [],
+                },
+            },
+        },
+        {
+            "type": "function",
+            "function": {
+                "name": "execute_terminal_with_context",
+                "description": "Run a shell command with before/after desktop and terminal-log verification",
+                "parameters": {
+                    "type": "object",
+                    "properties": {
+                        "command": {"type": "string", "description": "The shell command to run"},
+                        "cwd": {"type": "string", "description": "Optional working directory"},
+                        "prompt": {"type": "string", "description": "Optional visual analysis prompt"},
+                        "vision_profile": {"type": "string", "description": "bitvla, vlm-3r, or v2drop"},
+                        "terminal_log_path": {"type": "string", "description": "Optional terminal log file to tail"},
+                        "tail_lines": {"type": "integer", "description": "How many log lines to include"},
+                        "include_ocr": {"type": "boolean", "description": "Whether to capture OCR around execution"},
+                        "capture_before": {"type": "boolean", "description": "Capture GUI state before execution"},
+                        "capture_after": {"type": "boolean", "description": "Capture GUI state after execution"},
+                    },
+                    "required": ["command"],
+                },
+            },
+        },
+        {
+            "type": "function",
+            "function": {
+                "name": "agent_handoff",
+                "description": "Build a typed Milla-System-Admin to Milla-Coder handoff plan, optionally executing a shell step",
+                "parameters": {
+                    "type": "object",
+                    "properties": {
+                        "objective": {"type": "string", "description": "Overall objective for the handoff"},
+                        "command": {"type": "string", "description": "Optional shell command to run during the handoff"},
+                        "cwd": {"type": "string", "description": "Optional working directory"},
+                        "terminal_log_path": {"type": "string", "description": "Optional terminal log file to tail"},
+                        "vision_profile": {"type": "string", "description": "bitvla, vlm-3r, or v2drop"},
+                        "execute": {"type": "boolean", "description": "Whether to execute the shell step"},
+                    },
+                    "required": ["objective"],
+                },
+            },
+        },
+        {
+            "type": "function",
+            "function": {
+                "name": "control_mcp_tool",
+                "description": "Invoke an in-process desktop-control MCP tool",
+                "parameters": {
+                    "type": "object",
+                    "properties": {
+                        "tool_name": {"type": "string", "description": "desktop_context_snapshot, execute_terminal_with_context, or agent_handoff_plan"},
+                        "arguments": {"type": "object", "description": "Tool arguments"},
+                    },
+                    "required": ["tool_name"],
+                },
+            },
+        },
     ]
 
     def _dispatch_tool(name: str, args: dict) -> str:
@@ -275,6 +356,61 @@ async def chat_endpoint(chat: ChatMessage):
                 if items:
                     return "\n".join(f"[{i['type']}] {i['content']}" for i in items)
                 return "No memories found."
+
+            elif name == "desktop_context_snapshot":
+                from core_os.actions import desktop_context_snapshot
+
+                return json.dumps(
+                    desktop_context_snapshot(
+                        prompt=args.get("prompt", "Summarize the desktop and active terminal state."),
+                        vision_profile=args.get("vision_profile", "vlm-3r"),
+                        terminal_log_path=args.get("terminal_log_path"),
+                        tail_lines=args.get("tail_lines", 60),
+                        include_ocr=args.get("include_ocr", True),
+                        use_focus_regions=args.get("use_focus_regions", True),
+                    )
+                )
+
+            elif name == "execute_terminal_with_context":
+                from core_os.actions import execute_terminal_with_context
+
+                return json.dumps(
+                    execute_terminal_with_context(
+                        command=args.get("command", ""),
+                        cwd=args.get("cwd"),
+                        prompt=args.get("prompt"),
+                        vision_profile=args.get("vision_profile", "vlm-3r"),
+                        terminal_log_path=args.get("terminal_log_path"),
+                        tail_lines=args.get("tail_lines", 80),
+                        include_ocr=args.get("include_ocr", True),
+                        capture_before=args.get("capture_before", True),
+                        capture_after=args.get("capture_after", True),
+                    )
+                )
+
+            elif name == "agent_handoff":
+                from core_os.actions import agent_handoff
+
+                return json.dumps(
+                    agent_handoff(
+                        objective=args.get("objective", ""),
+                        command=args.get("command"),
+                        cwd=args.get("cwd"),
+                        terminal_log_path=args.get("terminal_log_path"),
+                        vision_profile=args.get("vision_profile", "vlm-3r"),
+                        execute=args.get("execute", False),
+                    )
+                )
+
+            elif name == "control_mcp_tool":
+                from core_os.actions import control_mcp_tool
+
+                return json.dumps(
+                    control_mcp_tool(
+                        args.get("tool_name", ""),
+                        args.get("arguments", {}),
+                    )
+                )
 
         except Exception as e:
             return f"Tool error ({name}): {e}"
@@ -610,9 +746,13 @@ async def cloud_models():
 async def local_models():
     """Return locally installed Ollama models."""
     try:
-        result = ollama_list() if (m := __import__("ollama", fromlist=["list"])) else None
-        models = [{"id": m["model"], "name": m["model"], "size": m.get("size", 0)}
-                  for m in (result.get("models", []) if result else [])]
+        _ollama = __import__("ollama")
+        result = _ollama.list() if _ollama else None
+        raw = result.get("models", []) if isinstance(result, dict) else (getattr(result, "models", None) or [])
+        models = [{"id": m["model"] if isinstance(m, dict) else m.model,
+                   "name": m["model"] if isinstance(m, dict) else m.model,
+                   "size": m.get("size", 0) if isinstance(m, dict) else getattr(m, "size", 0)}
+                  for m in raw]
         return {"models": models}
     except Exception:
         import subprocess
@@ -908,6 +1048,41 @@ class ComputerActionRequest(BaseModel):
 class HeadlessRequest(BaseModel):
     headless: bool
 
+
+class ControlContextRequest(BaseModel):
+    prompt: str = "Summarize the desktop and active terminal state."
+    vision_profile: str = "vlm-3r"
+    terminal_log_path: str | None = None
+    tail_lines: int = 60
+    include_ocr: bool = True
+    use_focus_regions: bool = True
+
+
+class ControlExecuteRequest(BaseModel):
+    command: str
+    cwd: str | None = None
+    prompt: str | None = None
+    vision_profile: str = "vlm-3r"
+    terminal_log_path: str | None = None
+    tail_lines: int = 80
+    include_ocr: bool = True
+    capture_before: bool = True
+    capture_after: bool = True
+
+
+class ControlHandoffRequest(BaseModel):
+    objective: str
+    command: str | None = None
+    cwd: str | None = None
+    terminal_log_path: str | None = None
+    vision_profile: str = "vlm-3r"
+    execute: bool = False
+
+
+class ControlMcpInvokeRequest(BaseModel):
+    tool_name: str
+    arguments: dict = {}
+
 @app.post("/api/computer/browser/headless")
 async def set_browser_headless(req: HeadlessRequest):
     """Toggle Playwright browser headless mode (restarts browser on next use)."""
@@ -1032,6 +1207,83 @@ async def computer_screenshot(scale: float = 0.5, x: int = 0, y: int = 0, w: int
     return {"screenshot": b64}
 
 
+@app.get("/api/control/mcp")
+async def control_mcp_status():
+    from core_os.actions import control_mcp_status as get_status
+
+    loop = asyncio.get_event_loop()
+    return await loop.run_in_executor(None, get_status)
+
+
+@app.post("/api/control/mcp")
+async def control_mcp_invoke(req: ControlMcpInvokeRequest):
+    from core_os.actions import control_mcp_tool
+
+    loop = asyncio.get_event_loop()
+    result = await loop.run_in_executor(None, control_mcp_tool, req.tool_name, req.arguments)
+    return {"ok": True, "tool_name": req.tool_name, "result": result}
+
+
+@app.post("/api/control/context")
+async def control_context(req: ControlContextRequest):
+    from core_os.actions import desktop_context_snapshot
+
+    loop = asyncio.get_event_loop()
+    result = await loop.run_in_executor(
+        None,
+        lambda: desktop_context_snapshot(
+            prompt=req.prompt,
+            vision_profile=req.vision_profile,
+            terminal_log_path=req.terminal_log_path,
+            tail_lines=req.tail_lines,
+            include_ocr=req.include_ocr,
+            use_focus_regions=req.use_focus_regions,
+        ),
+    )
+    return {"ok": True, "context": result}
+
+
+@app.post("/api/control/execute")
+async def control_execute(req: ControlExecuteRequest):
+    from core_os.actions import execute_terminal_with_context
+
+    loop = asyncio.get_event_loop()
+    result = await loop.run_in_executor(
+        None,
+        lambda: execute_terminal_with_context(
+            command=req.command,
+            cwd=req.cwd,
+            prompt=req.prompt,
+            vision_profile=req.vision_profile,
+            terminal_log_path=req.terminal_log_path,
+            tail_lines=req.tail_lines,
+            include_ocr=req.include_ocr,
+            capture_before=req.capture_before,
+            capture_after=req.capture_after,
+        ),
+    )
+    return {"ok": True, "execution": result}
+
+
+@app.post("/api/control/handoff")
+async def control_handoff(req: ControlHandoffRequest):
+    from core_os.actions import agent_handoff
+
+    loop = asyncio.get_event_loop()
+    result = await loop.run_in_executor(
+        None,
+        lambda: agent_handoff(
+            objective=req.objective,
+            command=req.command,
+            cwd=req.cwd,
+            terminal_log_path=req.terminal_log_path,
+            vision_profile=req.vision_profile,
+            execute=req.execute,
+        ),
+    )
+    return {"ok": True, "handoff": result}
+
+
 # ---------------------------------------------------------------------------
 # SKILL MANAGER ROUTES
 # ---------------------------------------------------------------------------
@@ -1145,7 +1397,7 @@ async def ws_neuro(websocket: WebSocket):
     try:
         while True:
             try:
-                with open("core_os/memory/neuro_state.json", "r") as f:
+                with open(os.path.join(PROJECT_ROOT, "core_os", "memory", "neuro_state.json"), "r") as f:
                     state = json.load(f)
                 state["sense"] = STATE.get("sense", "default")
             except Exception:

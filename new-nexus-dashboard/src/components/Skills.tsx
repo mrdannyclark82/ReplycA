@@ -52,7 +52,7 @@ export default function Skills() {
     setForging(true);
     setForgeMsg(null);
     try {
-      const { data } = await axios.post('/api/command', { command: `/forge ${forgeDesc.trim()}` });
+      const { data } = await axios.post('/api/skills/forge', { description: forgeDesc.trim() });
       const ok = !data.output?.startsWith('[Forge Error]');
       setForgeMsg({ ok, text: data.output || 'Done' });
       if (ok) { setForgeDesc(''); fetchSkills(); }

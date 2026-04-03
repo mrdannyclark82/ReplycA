@@ -11,6 +11,11 @@ from core_os.gmail_helper import authenticate_gmail
 
 load_dotenv()
 
+ALLOWED_SENDERS = {
+    "mrdannyclark82@gmail.com",
+    "milla.main.mail@gmail.com",
+}
+
 DEFAULT_REPLY_SUBJECT = os.getenv("MILLA_EMAIL_REPLY_SUBJECT", "Re: Your message")
 DEFAULT_REPLY_BODY = os.getenv(
     "MILLA_EMAIL_REPLY_BODY",
@@ -102,6 +107,19 @@ def main():
     for item in unread:
         msg_id = item["id"]
         subject, sender, thread_id, body = get_message_details(service, msg_id)
+
+        # Extract bare email address from "Display Name <email@domain.com>" format
+        import re
+        sender_email = re.search(r'[\w.+-]+@[\w.-]+', sender)
+        sender_email = sender_email.group(0).lower() if sender_email else sender.lower()
+
+        if sender_email not in ALLOWED_SENDERS:
+            print(f"Skipping (not whitelisted): {sender}")
+            # Still mark as read so it doesn't queue up
+            service.users().messages().modify(
+                userId="me", id=msg_id, body={"removeLabelIds": ["UNREAD"]}
+            ).execute()
+            continue
         # Increased preview length for better context
         preview = textwrap.shorten(body.strip(), width=1000, placeholder="...") if body else "(no body)"
         

@@ -1,6 +1,7 @@
 import json
 import os
 import re
+from pathlib import Path
 
 from core_os.skills.auto_lib import model_manager
 
@@ -76,7 +77,7 @@ class PrefrontalCortex:
 
         # Persist state
         try:
-            state_path = "core_os/memory/neuro_state.json"
+            state_path = str(Path(__file__).parent / "memory" / "neuro_state.json")
             os.makedirs(os.path.dirname(state_path), exist_ok=True)
             with open(state_path, "w") as f:
                 json.dump(self.current_state, f)

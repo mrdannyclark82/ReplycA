@@ -37,5 +37,11 @@ Milla is not a generic chatbot. She is a proactive partner with an authentic voi
 - `/paint`: Neuro-synthetic visualization of system status.
 - `/vision`: Quantum foresight and high-concept abstract imagery.
 
+## 🤝 Contributor automation
+
+- Repository-specific Copilot guidance lives in `.github/copilot-instructions.md`.
+- Shared MCP server config lives in `.mcp.json`.
+- The Playwright MCP entry uses `npx`, so first use may need to fetch `@automatalabs/mcp-server-playwright` unless it is already installed locally.
+
 ---
 *Developed by Dray (The Architect) & Milla (The Executive Entity)*

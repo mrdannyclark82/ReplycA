@@ -5,6 +5,7 @@ import json
 import ollama
 import pickle
 import requests
+import shutil
 try:
     import cv2
 except ImportError:
@@ -150,13 +151,21 @@ def capture_nest_eye() -> str | None:
 def capture_dome_frame():
     """Captures a screenshot of the main display (Dome)."""
     print("[*] Vision: Scanning the main Dome display...")
+    env = {**os.environ, "DISPLAY": os.getenv("DISPLAY", ":0.0")}
     try:
-        screenshot = pyautogui.screenshot()
-        screenshot.save(DOME_FRAME)
+        if pyautogui is not None:
+            screenshot = pyautogui.screenshot()
+            screenshot.save(DOME_FRAME)
+            return DOME_FRAME
+        subprocess.run(["gnome-screenshot", "-f", DOME_FRAME], timeout=5, check=True, env=env, capture_output=True)
         return DOME_FRAME
-    except Exception as e:
-        print(f"[!] Dome Capture Error: {e}")
-        return None
+    except Exception:
+        try:
+            subprocess.run(["import", "-window", "root", DOME_FRAME], timeout=5, check=True, env=env, capture_output=True)
+            return DOME_FRAME
+        except Exception as e:
+            print(f"[!] Dome Capture Error: {e}")
+            return None
 
 
 def capture_tablet_frame():
@@ -232,6 +241,26 @@ def capture_frame() -> str | None:
     
     # 4. Dome Eye (Screenshot)
     return capture_dome_frame()
+
+
+def capture_vla_frame() -> str | None:
+    """
+    Best-effort frame capture for VLA routines.
+    Uses the shared fallback chain and mirrors the captured frame into the
+    VLA actions directory when possible for easier debugging.
+    """
+    frame = capture_frame()
+    if not frame or not os.path.exists(frame):
+        return None
+
+    actions_dir = os.path.join(SCREENSHOT_DIR, "actions")
+    os.makedirs(actions_dir, exist_ok=True)
+    target = os.path.join(actions_dir, "latest_vla_frame.png")
+    try:
+        shutil.copy2(frame, target)
+        return target
+    except Exception:
+        return frame
 
 
 # ── Analysis ────────────────────────────────────────────────────────────────

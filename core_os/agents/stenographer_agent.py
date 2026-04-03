@@ -33,8 +33,7 @@ class Stenographer:
         Path(KEYSTROKE_BUFFER).parent.mkdir(parents=True, exist_ok=True)
         
         with open(KEYSTROKE_BUFFER, "a") as f:
-            f.write(json.dumps(entry) + "
-")
+            f.write(json.dumps(entry) + "\n")
             
         self.last_press = time.time()
 

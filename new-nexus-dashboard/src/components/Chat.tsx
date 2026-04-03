@@ -75,7 +75,7 @@ const Chat: React.FC = () => {
 
   // ── Load history on mount (backend first, localStorage fallback) ──────
   useEffect(() => {
-    axios.get('/api/model').then(r => setCurrentModel(r.data.model)).catch(() => {});
+    axios.get('/api/model').then(r => setCurrentModel(r.data.current ?? r.data.model ?? 'grok-4-latest')).catch(() => {});
 
     const loadHistory = async () => {
       try {

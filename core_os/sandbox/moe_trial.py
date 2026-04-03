@@ -37,24 +37,17 @@ def run_trial():
         duration = end_time - start_time
         content = response['message']['content']
         
-        print(f"
-[+] Trial Complete in {duration:.2f} seconds.")
+        print(f"\n[+] Trial Complete in {duration:.2f} seconds.")
         print("-" * 40)
         print(content)
         print("-" * 40)
         
         # Save results to memory
         with open("ogdray/core_os/sandbox/moe_trial_results.txt", "a") as f:
-            f.write(f"
---- TRIAL: {datetime.now().isoformat()} ---
-")
-            f.write(f"Model: {MODEL_NAME}
-")
-            f.write(f"Duration: {duration:.2f}s
-")
-            f.write(f"Results:
-{content}
-")
+            f.write(f"\n--- TRIAL: {datetime.now().isoformat()} ---\n")
+            f.write(f"Model: {MODEL_NAME}\n")
+            f.write(f"Duration: {duration:.2f}s\n")
+            f.write(f"Results:\n{content}\n")
             
     except Exception as e:
         print(f"[!] Trial Failure: {e}")

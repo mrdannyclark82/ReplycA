@@ -39,8 +39,7 @@ class SelfHealingAgent:
         current_prompt = task
         
         for attempt in range(max_retries):
-            print(f"
-[Attempt {attempt + 1}/{max_retries}] Milla is thinking...")
+            print(f"\n[Attempt {attempt + 1}/{max_retries}] Milla is thinking...")
             
             # 1. Ask Model for action
             response = model_manager.chat(
@@ -52,8 +51,7 @@ class SelfHealingAgent:
             self.history.append({'role': 'user', 'content': current_prompt})
             self.history.append(msg)
 
-            print(f"
-Milla: {content}")
+            print(f"\nMilla: {content}")
 
             # 2. Heuristic check: Did we fail?
             if "FAILED" in content.upper() or "ERROR" in content.upper():

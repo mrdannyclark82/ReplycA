@@ -136,11 +136,11 @@ export default function SystemStats() {
       </div>
 
       {/* Temperatures */}
-      {Object.keys(stats.temperatures).length > 0 && (
+      {Object.keys(stats.temperatures ?? {}).length > 0 && (
         <div style={{ ...S.card, marginBottom: '10px' }}>
           <div style={S.label}><Thermometer size={11} /> Temperatures</div>
           <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap' as const }}>
-            {Object.entries(stats.temperatures).map(([k, v]) => (
+            {Object.entries(stats.temperatures ?? {}).map(([k, v]) => (
               <div key={k}>
                 <div style={{ color: v > 80 ? '#f87171' : v > 65 ? '#fbbf24' : '#34d399', fontWeight: 700, fontSize: '14px' }}>{v}°C</div>
                 <div style={S.sub}>{k}</div>
@@ -163,7 +163,7 @@ export default function SystemStats() {
             </tr>
           </thead>
           <tbody>
-            {stats.top_procs.map((p, i) => (
+            {(stats.top_procs ?? []).map((p, i) => (
               <tr key={i}>
                 <td style={{ ...S.td, color: 'rgba(255,255,255,0.3)' }}>{p.pid}</td>
                 <td style={S.td}>{p.name}</td>

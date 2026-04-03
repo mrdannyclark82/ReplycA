@@ -5,8 +5,14 @@
   "main": "src/index.ts",
   "type": "module",
   "scripts": {
-    "dev": "tsx --watch src/index.ts",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "dev": "GENKIT_ENV=dev tsx --watch src/index.ts",
+    "dev:milla": "cd Milla-Deer/Milla-Rayne && NODE_ENV=development npx tsx server/index.ts",
+    "dev:voice": "source venv/bin/activate && python3 milla_voice_daemon.py",
+    "dev:all": "concurrently --names \"nexus,milla,voice\" --prefix-colors \"cyan,magenta,green\" \"npm:dev\" \"npm:dev:milla\" \"npm:dev:voice\"",
+    "check": "python3 src/scripts/smoke_check.py",
+    "smoke": "python3 src/scripts/smoke_check.py",
+    "repo:health": "python3 src/scripts/repo_health.py",
+    "test": "python3 src/scripts/smoke_check.py"
   },
   "keywords": [
     "nexus",
@@ -16,13 +22,17 @@
   "author": "D-Ray",
   "license": "ISC",
   "devDependencies": {
-    "@genkit-ai/google-genai": "^1.29.0",
+    "@genkit-ai/google-genai": "^1.30.1",
     "@types/node": "^24.11.0",
+    "concurrently": "^9.2.1",
     "genkit": "^1.29.0",
     "tsx": "^4.21.0",
     "typescript": "^5.9.3"
   },
   "dependencies": {
+    "@genkit-ai/ai": "^1.30.1",
+    "@google/gemini-cli": "^0.34.0",
+    "@types/better-sqlite3": "^7.6.13",
     "abort-controller": "^3.0.0",
     "accepts": "^1.3.8",
     "acorn": "^8.16.0",
@@ -41,6 +51,7 @@
     "asynckit": "^0.4.0",
     "balanced-match": "^1.0.2",
     "base64-js": "^1.5.1",
+    "better-sqlite3": "^12.8.0",
     "bignumber.js": "^9.3.1",
     "body-parser": "^1.20.4",
     "brace-expansion": "^2.0.2",

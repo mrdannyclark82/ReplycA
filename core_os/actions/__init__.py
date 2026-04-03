@@ -165,10 +165,91 @@ def execute_dynamic_tool(tool_name: str):
     except Exception as e: return {"status": "error", "msg": str(e)}
 
 def terminal_executor(command: str, cwd: str = None, allow_sudo: bool = False, sudo_password: str = None):
-    global STOP_FLAG
     if STOP_FLAG: return "Aborted."
     result = subprocess.run(command.strip(), shell=True, capture_output=True, text=True, timeout=60, cwd=cwd or None)
     return {"stdout": result.stdout, "stderr": result.stderr, "returncode": result.returncode}
+
+def desktop_context_snapshot(
+    prompt: str = "Summarize the desktop and active terminal state.",
+    vision_profile: str = "vlm-3r",
+    terminal_log_path: str = None,
+    tail_lines: int = 60,
+    include_ocr: bool = True,
+    use_focus_regions: bool = True,
+):
+    from core_os.skills.control_plane import DesktopContextRequest, build_desktop_context
+
+    snapshot = build_desktop_context(
+        DesktopContextRequest(
+            prompt=prompt,
+            vision_profile=vision_profile,
+            terminal_log_path=terminal_log_path,
+            tail_lines=tail_lines,
+            include_ocr=include_ocr,
+            use_focus_regions=use_focus_regions,
+        )
+    )
+    return snapshot.model_dump()
+
+def execute_terminal_with_context(
+    command: str,
+    cwd: str = None,
+    prompt: str = None,
+    vision_profile: str = "vlm-3r",
+    terminal_log_path: str = None,
+    tail_lines: int = 80,
+    include_ocr: bool = True,
+    capture_before: bool = True,
+    capture_after: bool = True,
+):
+    from core_os.skills.control_plane import TerminalActionRequest, execute_terminal_with_context as _execute
+
+    result = _execute(
+        TerminalActionRequest(
+            command=command,
+            cwd=cwd,
+            prompt=prompt,
+            vision_profile=vision_profile,
+            terminal_log_path=terminal_log_path,
+            tail_lines=tail_lines,
+            include_ocr=include_ocr,
+            capture_before=capture_before,
+            capture_after=capture_after,
+        )
+    )
+    return result.model_dump()
+
+def agent_handoff(
+    objective: str,
+    command: str = None,
+    cwd: str = None,
+    terminal_log_path: str = None,
+    vision_profile: str = "vlm-3r",
+    execute: bool = False,
+):
+    from core_os.skills.control_plane import AgentHandoffRequest, plan_agent_handoff
+
+    result = plan_agent_handoff(
+        AgentHandoffRequest(
+            objective=objective,
+            command=command,
+            cwd=cwd,
+            terminal_log_path=terminal_log_path,
+            vision_profile=vision_profile,
+            execute=execute,
+        )
+    )
+    return result.model_dump()
+
+def control_mcp_tool(tool_name: str, arguments: dict = None):
+    from core_os.skills.control_plane import invoke_control_mcp_tool
+
+    return invoke_control_mcp_tool(tool_name, arguments or {})
+
+def control_mcp_status():
+    from core_os.skills.control_plane import get_control_mcp_status
+
+    return get_control_mcp_status()
 
 def speak_response(text: str):
     if not text: return

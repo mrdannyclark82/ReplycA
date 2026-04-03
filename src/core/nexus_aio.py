@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 import os
 import sys
+import re
 import json
 import time
 from pathlib import Path
@@ -9,7 +10,7 @@ from datetime import datetime
 # ==============================================================================
 # IMPORT PURGE PROTOCOL (Ensures core_os resolves from this root)
 # ==============================================================================
-PROJECT_ROOT = Path(__file__).parent.resolve()
+PROJECT_ROOT = Path(__file__).parents[2].resolve()
 sys.path.insert(0, str(PROJECT_ROOT))
 
 # Force clear any stale core_os imports
@@ -27,6 +28,151 @@ try:
 except ImportError as e:
     print(f"[!] Nexus-AIO Critical Failure: Missing core_os modules. ({e})")
     sys.exit(1)
+
+# ==============================================================================
+# TOOL DEFINITIONS (OpenAI-compatible JSON schema for Ollama/xAI)
+# ==============================================================================
+MILLA_TOOLS = [
+    {
+        "type": "function",
+        "function": {
+            "name": "shell_exec",
+            "description": "Execute a bash shell command on the Nexus server",
+            "parameters": {
+                "type": "object",
+                "properties": {"command": {"type": "string", "description": "The bash command to run"}},
+                "required": ["command"],
+            },
+        },
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "read_file",
+            "description": "Read the contents of a file on the Nexus server",
+            "parameters": {
+                "type": "object",
+                "properties": {"path": {"type": "string", "description": "Relative path from the project root"}},
+                "required": ["path"],
+            },
+        },
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "write_file",
+            "description": "Write or update a file on the Nexus server",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "path": {"type": "string", "description": "Relative path from project root"},
+                    "content": {"type": "string", "description": "Full file content to write"},
+                },
+                "required": ["path", "content"],
+            },
+        },
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "web_search",
+            "description": "Search the web for current information, news, or research topics",
+            "parameters": {
+                "type": "object",
+                "properties": {"query": {"type": "string", "description": "The search query"}},
+                "required": ["query"],
+            },
+        },
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "memory_search",
+            "description": "Search Milla's long-term memory database",
+            "parameters": {
+                "type": "object",
+                "properties": {"query": {"type": "string", "description": "The memory search query"}},
+                "required": ["query"],
+            },
+        },
+    },
+]
+
+def _dispatch_tool(name: str, args: dict) -> str:
+    """Execute a tool call and return result as string."""
+    try:
+        if name == "shell_exec":
+            result = terminal_executor(args.get("command", ""))
+            if isinstance(result, dict):
+                out = result.get("stdout", "").strip()
+                err = result.get("stderr", "").strip()
+                return out or err or f"Exit code: {result.get('returncode', 0)}"
+            return str(result)
+
+        elif name == "read_file":
+            p = PROJECT_ROOT / args.get("path", "")
+            if p.is_file():
+                return p.read_text(errors='replace')[:4000]
+            return f"File not found: {args.get('path')}"
+
+        elif name == "write_file":
+            p = PROJECT_ROOT / args.get("path", "")
+            p.parent.mkdir(parents=True, exist_ok=True)
+            p.write_text(args.get("content", ""))
+            return f"Written: {args.get('path')}"
+
+        elif name == "web_search":
+            from core_os.actions import web_search
+            result = web_search(args.get("query", ""))
+            if result.get("status") == "success":
+                results = result.get("results", [])
+                return "\n".join(f"- {r}" for r in results[:5]) if results else "No results found."
+            return f"Search error: {result.get('msg', 'unknown')}"
+
+        elif name == "memory_search":
+            items = model_manager._query_long_term_db(args.get("query", ""), limit=6)
+            if items:
+                return "\n".join(f"[{i['type']}] {i['content']}" for i in items)
+            return "No memories found."
+
+    except Exception as e:
+        return f"Tool error ({name}): {e}"
+    return f"Unknown tool: {name}"
+
+def _parse_text_tool_calls(content: str) -> list:
+    """
+    Parse [TOOL_CALL]...[/TOOL_CALL] blocks that the model emits as text
+    when native function calling isn't triggered. Returns list of
+    {function: {name, arguments}} dicts compatible with the tool loop.
+    """
+    calls = []
+    for block in re.findall(r'\[TOOL_CALL\](.*?)\[/TOOL_CALL\]', content, re.DOTALL):
+        block = block.strip()
+        # Extract tool name: tool => "name" or "tool": "name"
+        name_match = re.search(r'tool\s*(?:=>|:)\s*["\']?(\w+)["\']?', block)
+        if not name_match:
+            continue
+        name = name_match.group(1)
+        # Extract args block
+        args = {}
+        args_match = re.search(r'args\s*(?:=>|:)\s*\{(.*?)\}', block, re.DOTALL)
+        if args_match:
+            args_raw = args_match.group(1).strip()
+            # Handle --key "value" CLI style
+            for m in re.finditer(r'--(\w+)\s+"([^"]*)"', args_raw):
+                args[m.group(1)] = m.group(2)
+            # Handle --key value (unquoted)
+            for m in re.finditer(r'--(\w+)\s+(?!")([^\s,}]+)', args_raw):
+                if m.group(1) not in args:
+                    args[m.group(1)] = m.group(2)
+            # Handle "key": "value" JSON style
+            if not args:
+                try:
+                    args = json.loads("{" + args_raw + "}")
+                except Exception:
+                    pass
+        calls.append({"function": {"name": name, "arguments": args}})
+    return calls
 
 import threading
 
@@ -165,7 +311,7 @@ def handle_command(cmd_str):
     elif cmd == "/gim":
         print("[*] Triggering GIM Monologue...")
         try:
-            from milla_gim import generate_monologue
+            from src.milla.integrations.milla_gim import generate_monologue
             generate_monologue()
         except ImportError:
             print("[!] GIM Module not found.")
@@ -204,17 +350,48 @@ def main_loop():
             
             if not handle_command(user_input):
                 # Send to Milla for AI response
-                messages = [{"role": "user", "content": user_input}]
-                # Integrate history
-                history = load_shared_history(limit=5)
-                full_messages = history + messages
-                
+                history = load_shared_history(limit=50)
+                messages = history + [{"role": "user", "content": user_input}]
+
                 print("[*] Milla is thinking...")
-                response = model_manager.chat(messages=full_messages)
-                content = response['message']['content']
-                
+
+                # Agentic tool-call loop (up to 5 rounds)
+                content = ""
+                for _round in range(5):
+                    response = model_manager.chat(messages=messages, tools=MILLA_TOOLS)
+                    msg = response.get("message", {})
+                    tool_calls = msg.get("tool_calls") or []
+
+                    # Fallback: parse [TOOL_CALL] blocks from model text output
+                    if not tool_calls:
+                        raw_content = msg.get("content", "")
+                        tool_calls = _parse_text_tool_calls(raw_content)
+
+                    if not tool_calls:
+                        content = msg.get("content", "")
+                        break
+
+                    # Execute tools and feed results back
+                    messages.append({"role": "assistant", "content": msg.get("content", ""), "tool_calls": tool_calls})
+                    for tc in tool_calls:
+                        fn = tc.get("function", {})
+                        name = fn.get("name", "")
+                        raw_args = fn.get("arguments", {})
+                        args = raw_args if isinstance(raw_args, dict) else json.loads(raw_args or "{}")
+                        print(f"  [TOOL] {name}({args})")
+                        tool_result = _dispatch_tool(name, args)
+                        print(f"  [RESULT] {str(tool_result)[:200]}")
+                        messages.append({"role": "tool", "name": name, "content": str(tool_result)})
+                else:
+                    # Hit loop limit — get final answer without tools
+                    response = model_manager.chat(messages=messages)
+                    content = response.get("message", {}).get("content", "")
+
+                if not content:
+                    content = "[System: No response generated]"
+
                 print(f"\nMilla: {content}")
-                
+
                 # Update Shared History
                 append_shared_messages([
                     {"role": "user", "content": user_input, "source": "nexus_aio"},

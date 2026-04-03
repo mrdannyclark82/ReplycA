@@ -27,7 +27,8 @@ export default function NeuroEditor() {
     setLoading(true);
     try {
       const res = await axios.get(`${API}/api/neuro`);
-      setState(res.data); setDraft(res.data);
+      const s = res.data.state ?? res.data;
+      setState(s); setDraft(s);
     } catch { /* fallback */ }
     setLoading(false);
   };

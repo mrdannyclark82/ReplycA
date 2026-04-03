@@ -24,10 +24,11 @@ try:
     from core_os.gmail_helper import authenticate_gmail
     from core_os.drive_helper import get_drive_service
 except Exception as e:
+    _import_err = str(e)
     def authenticate_gmail():
-        raise ImportError(f"Gmail dependencies missing: {e}")
+        raise ImportError(f"Gmail dependencies missing: {_import_err}")
     def get_drive_service():
-        raise ImportError(f"Drive dependencies missing: {e}")
+        raise ImportError(f"Drive dependencies missing: {_import_err}")
 
 load_dotenv(override=True)
 
@@ -133,11 +134,24 @@ def get_secret(secret_id: str, project_id: str = None) -> str:
         return os.getenv(secret_id, "")
 
 def _ollama_to_dict(resp) -> dict:
-    """Normalize an ollama ChatResponse (Pydantic) or plain dict to {"message": {"role":..,"content":..}}."""
+    """Normalize an ollama ChatResponse (Pydantic) or plain dict to {"message": {"role":..,"content":..,"tool_calls":[..]}}."""
     if isinstance(resp, dict):
         return resp
     try:
-        return {"message": {"role": resp.message.role, "content": resp.message.content}}
+        msg = {"role": resp.message.role, "content": resp.message.content}
+        # Preserve native tool_calls if the model returned them
+        raw_calls = getattr(resp.message, "tool_calls", None)
+        if raw_calls:
+            normalized = []
+            for tc in raw_calls:
+                fn = getattr(tc, "function", tc)
+                name = getattr(fn, "name", None) or (tc.get("function", {}).get("name") if isinstance(tc, dict) else None)
+                arguments = getattr(fn, "arguments", None) or (tc.get("function", {}).get("arguments") if isinstance(tc, dict) else {})
+                if name:
+                    normalized.append({"function": {"name": name, "arguments": arguments if isinstance(arguments, dict) else {}}})
+            if normalized:
+                msg["tool_calls"] = normalized
+        return {"message": msg}
     except Exception:
         return {"message": {"role": "assistant", "content": str(resp)}}
 
@@ -350,7 +364,7 @@ class UnifiedModelManager:
         # Convert tools if necessary, but for now simple chat
         payload = {
             "messages": messages,
-            "model": self.current_model,
+            "model": DEFAULT_MODEL,  # always use xAI model name, not Ollama model name
             "stream": False,
             "temperature": options.get("temperature", 0.7) if options else 0.7
         }

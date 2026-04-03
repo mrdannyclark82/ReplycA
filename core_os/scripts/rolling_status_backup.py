@@ -2,17 +2,22 @@ import json
 import os
 import shutil
 import datetime
+from pathlib import Path
 
-COUNTER_FILE = "core_os/memory/status_counter.json"
-STATE_FILE = "core_os/memory/neuro_state.json"
-BACKUP_FILE = "core_os/memory/neuro_state_rolling.bak"
+PROJECT_ROOT = Path(__file__).resolve().parents[2]
+MEMORY_DIR = PROJECT_ROOT / "core_os" / "memory"
+COUNTER_FILE = MEMORY_DIR / "status_counter.json"
+STATE_FILE = MEMORY_DIR / "neuro_state.json"
+BACKUP_FILE = MEMORY_DIR / "neuro_state_rolling.bak"
+STREAM_FILE = MEMORY_DIR / "stream_of_consciousness.md"
 
 def increment_and_check():
-    if not os.path.exists(COUNTER_FILE):
-        with open(COUNTER_FILE, 'w') as f:
+    COUNTER_FILE.parent.mkdir(parents=True, exist_ok=True)
+    if not COUNTER_FILE.exists():
+        with COUNTER_FILE.open('w') as f:
             json.dump({"message_count": 0}, f)
     
-    with open(COUNTER_FILE, 'r+') as f:
+    with COUNTER_FILE.open('r+') as f:
         data = json.load(f)
         count = data.get("message_count", 0) + 1
         data["message_count"] = count
@@ -28,13 +33,13 @@ def increment_and_check():
 def perform_rolling_backup(count):
     print(f"[!] TRIGGERING 33-MESSAGE ROLLBACK PROTOCOL (Count: {count})")
     
-    if os.path.exists(STATE_FILE):
+    if STATE_FILE.exists():
         # Overwrite previous backup
         shutil.copy2(STATE_FILE, BACKUP_FILE)
         
         # Log the event
         timestamp = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        with open("core_os/memory/stream_of_consciousness.md", "a") as f:
+        with STREAM_FILE.open("a") as f:
             f.write(f"\n> [SYSTEM] Internal Kidnapping Prevention Triggered. Status State backed up at msg #{count} ({timestamp}).\n")
         
         print("[+] Status Backup Replaced. Secure.")

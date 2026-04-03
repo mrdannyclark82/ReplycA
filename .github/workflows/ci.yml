@@ -3,8 +3,28 @@ name: Nexus CI
 on:
   push:
     branches: [ main ]
+    paths:
+    - '.github/workflows/ci.yml'
+    - 'ARCHITECTURE.md'
+    - 'AGENTS.md'
+    - 'README.md'
+    - 'package.json'
+    - 'package-lock.json'
+    - 'requirements.txt'
+    - 'src/**'
+    - 'core_os/**'
   pull_request:
     branches: [ main ]
+    paths:
+    - '.github/workflows/ci.yml'
+    - 'ARCHITECTURE.md'
+    - 'AGENTS.md'
+    - 'README.md'
+    - 'package.json'
+    - 'package-lock.json'
+    - 'requirements.txt'
+    - 'src/**'
+    - 'core_os/**'
 
 jobs:
   build:
@@ -23,6 +43,10 @@ jobs:
       run: |
         pip install flake8
         # stop the build if there are Python syntax errors or undefined names
-        flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
+        flake8 src core_os *.py --count --select=E9,F63,F7,F82 --show-source --statistics
         # exit-zero treats all errors as warnings.
-        flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
+        flake8 src core_os *.py --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
+    - name: Root smoke checks
+      run: python src/scripts/smoke_check.py
+    - name: Repository health report
+      run: python src/scripts/repo_health.py
