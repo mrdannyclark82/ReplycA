@@ -1,6 +1,7 @@
 import { Shield } from 'lucide-react';
 import { WindowManager, useWindowManager } from './WindowManager';
 import NeuroHud from './NeuroHud';
+import DesktopCanvas from './DesktopCanvas';
 import CommandPalette, { type PaletteCommand } from './CommandPalette';
 import Chat from '../components/Chat';
 import Terminal from '../components/Terminal';
@@ -97,19 +98,12 @@ export default function RayneOS() {
 
       {/* Desktop */}
       <div id="rayne-desktop" style={{ position: 'absolute', top: '28px', left: 0, right: 0, bottom: '80px' }}>
+        <DesktopCanvas hasWindows={wm.windows.length > 0} />
         <WindowManager
           windows={wm.windows}
           onClose={wm.close} onFocus={wm.focus} onMinimize={wm.minimize}
           onDock={wm.toggleDock} onPin={wm.togglePin} onMove={wm.move} onResize={wm.resize}
         />
-        {wm.windows.length === 0 && (
-          <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -60%)', textAlign: 'center', pointerEvents: 'none' }}>
-            <div style={{ fontSize: '11px', color: 'rgba(6,182,212,0.18)', letterSpacing: '0.4em', textTransform: 'uppercase', marginBottom: '8px' }}>Rayne OS</div>
-            <div style={{ fontSize: '9px', color: 'rgba(255,255,255,0.08)', letterSpacing: '0.2em' }}>click icon or ⌃K to open</div>
-          </div>
-        )}
-
-        {/* Neural vitals widget */}
         <NeuroHud />
       </div>
 

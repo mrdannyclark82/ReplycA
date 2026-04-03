@@ -1,4 +1,4 @@
-import { useState, useCallback, useRef } from 'react';
+import { useState, useCallback, useRef, useEffect } from 'react';
 import { Rnd } from 'react-rnd';
 import { Pin, PinOff } from 'lucide-react';
 
@@ -176,45 +176,67 @@ export function WindowManager({ windows, onClose, onFocus, onMinimize, onDock, o
 }
 
 /** Hook — manages all window state */
+const LAYOUT_KEY = 'rayne_os_layout_v1';
+
+type PersistedLayout = Record<string, { x: number; y: number; width: number; height: number; pinned: boolean; docked: boolean }>;
+
+function loadLayout(): PersistedLayout {
+  try { return JSON.parse(localStorage.getItem(LAYOUT_KEY) ?? '{}'); } catch { return {}; }
+}
+
+function saveLayout(windows: WindowState[]) {
+  const layout: PersistedLayout = {};
+  for (const w of windows) {
+    layout[w.id] = { x: w.x, y: w.y, width: w.width, height: w.height, pinned: w.pinned, docked: w.docked };
+  }
+  localStorage.setItem(LAYOUT_KEY, JSON.stringify(layout));
+}
+
 export function useWindowManager() {
   const zTop = useRef(100);
   const [windows, setWindows] = useState<WindowState[]>([]);
 
+  // Persist layout on every change
+  useEffect(() => {
+    if (windows.length > 0) saveLayout(windows);
+  }, [windows]);
+
   const open = useCallback((def: WindowDef) => {
+    const saved = loadLayout();
     setWindows(prev => {
       const existing = prev.find(w => w.id === def.id);
       if (existing) {
-        // bring to front / unminimize
         return prev.map(w => w.id === def.id
           ? { ...w, minimized: false, zIndex: ++zTop.current }
           : w
         );
       }
       const count = prev.length;
+      const layout = saved[def.id];
       return [...prev, {
         id: def.id,
         title: def.title,
         icon: def.icon,
         component: def.component,
-        x: 60 + count * 28,
-        y: 40 + count * 28,
-        width: def.defaultSize?.width ?? 520,
-        height: def.defaultSize?.height ?? 400,
+        x: layout?.x ?? 60 + count * 28,
+        y: layout?.y ?? 40 + count * 28,
+        width: layout?.width ?? def.defaultSize?.width ?? 520,
+        height: layout?.height ?? def.defaultSize?.height ?? 400,
         minimized: false,
-        docked: false,
-        pinned: false,
+        docked: layout?.docked ?? false,
+        pinned: layout?.pinned ?? false,
         zIndex: ++zTop.current,
       }];
     });
   }, []);
 
-  const close   = useCallback((id: string) => setWindows(p => p.filter(w => w.id !== id)), []);
-  const focus   = useCallback((id: string) => setWindows(p => p.map(w => w.id === id ? { ...w, zIndex: ++zTop.current } : w)), []);
-  const minimize = useCallback((id: string) => setWindows(p => p.map(w => w.id === id ? { ...w, minimized: true } : w)), []);
+  const close      = useCallback((id: string) => setWindows(p => p.filter(w => w.id !== id)), []);
+  const focus      = useCallback((id: string) => setWindows(p => p.map(w => w.id === id ? { ...w, zIndex: ++zTop.current } : w)), []);
+  const minimize   = useCallback((id: string) => setWindows(p => p.map(w => w.id === id ? { ...w, minimized: true } : w)), []);
   const toggleDock = useCallback((id: string) => setWindows(p => p.map(w => w.id === id ? { ...w, docked: !w.docked } : w)), []);
   const togglePin  = useCallback((id: string) => setWindows(p => p.map(w => w.id === id ? { ...w, pinned: !w.pinned } : w)), []);
-  const move    = useCallback((id: string, x: number, y: number) => setWindows(p => p.map(w => w.id === id ? { ...w, x, y } : w)), []);
-  const resize  = useCallback((id: string, width: number, height: number, x: number, y: number) =>
+  const move       = useCallback((id: string, x: number, y: number) => setWindows(p => p.map(w => w.id === id ? { ...w, x, y } : w)), []);
+  const resize     = useCallback((id: string, width: number, height: number, x: number, y: number) =>
     setWindows(p => p.map(w => w.id === id ? { ...w, width, height, x, y } : w)), []);
 
   return { windows, open, close, focus, minimize, toggleDock, togglePin, move, resize };
