@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { createPortal } from 'react-dom';
 import { X, Search } from 'lucide-react';
 import type { WindowDef } from './WindowManager';
 
@@ -127,8 +128,8 @@ export default function AppsMenu({ onOpen }: Props) {
         ⊞
       </button>
 
-      {/* Overlay */}
-      {open && (
+      {/* Overlay — rendered via portal to escape dock's transform stacking context */}
+      {open && createPortal(
         <div
           style={{
             position: 'fixed', inset: 0, zIndex: 99990,
@@ -142,14 +143,15 @@ export default function AppsMenu({ onOpen }: Props) {
             position: 'fixed',
             top: '50%', left: '50%',
             transform: 'translate(-50%, -50%)',
-            width: '680px', maxWidth: '92vw',
-            height: '70vh', maxHeight: '600px',
+            width: 'min(680px, 92vw)',
+            height: 'min(580px, 80vh)',
             background: 'rgba(8,10,16,0.97)', backdropFilter: 'blur(24px)',
             border: '1px solid rgba(168,85,247,0.2)', borderRadius: '18px',
             boxShadow: '0 32px 80px rgba(0,0,0,0.9), 0 0 0 1px rgba(168,85,247,0.06)',
             display: 'flex', flexDirection: 'column',
             overflow: 'hidden',
             fontFamily: "'JetBrains Mono', monospace",
+            zIndex: 99991,
           }}
           >
             {/* Header */}
@@ -252,7 +254,7 @@ export default function AppsMenu({ onOpen }: Props) {
             </div>
           </div>
         </div>
-      )}
+      , document.body)}
     </>
   );
 }
