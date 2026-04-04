@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
-import { Package, Download, Play, Trash2, ToggleLeft, ToggleRight, RefreshCw, Github, ChevronDown, ChevronUp, AlertTriangle, CheckCircle, Wand2 } from 'lucide-react';
+import { Package, Download, Play, Trash2, ToggleLeft, ToggleRight, RefreshCw, Github, ChevronDown, ChevronUp, AlertTriangle, CheckCircle, Wand2, Copy, Check } from 'lucide-react';
 
 interface SkillMeta {
   name: string;
@@ -29,6 +29,13 @@ export default function Skills() {
   const [payloads, setPayloads]     = useState<Record<string, string>>({});
   const [runResults, setRunResults] = useState<Record<string, RunResult>>({});
   const [running, setRunning]       = useState<string | null>(null);
+  const [copiedSkill, setCopiedSkill] = useState<string | null>(null);
+  const copyResult = useCallback((skillName: string, text: string) => {
+    navigator.clipboard.writeText(text).then(() => {
+      setCopiedSkill(skillName);
+      setTimeout(() => setCopiedSkill(null), 2000);
+    });
+  }, []);
   const [loading, setLoading]       = useState(false);
 
   // Forge state
@@ -339,12 +346,21 @@ export default function Skills() {
 
                     {/* Run result */}
                     {runResult && (
-                      <div className={`rounded px-3 py-2 text-[10px] font-mono whitespace-pre-wrap break-all ${
-                        runResult.ok ? 'bg-green-950/30 border border-green-500/20' : 'bg-red-950/30 border border-red-500/20'
-                      }`} style={{ color: runResult.ok ? 'var(--green)' : 'var(--red)' }}>
-                        {runResult.ok
-                          ? JSON.stringify(runResult.result, null, 2)
-                          : `Error: ${runResult.error}`}
+                      <div className="relative">
+                        <div className={`rounded px-3 py-2 text-[10px] font-mono whitespace-pre-wrap break-all ${
+                          runResult.ok ? 'bg-green-950/30 border border-green-500/20' : 'bg-red-950/30 border border-red-500/20'
+                        }`} style={{ color: runResult.ok ? 'var(--green)' : 'var(--red)' }}>
+                          {runResult.ok
+                            ? JSON.stringify(runResult.result, null, 2)
+                            : `Error: ${runResult.error}`}
+                        </div>
+                        <button
+                          onClick={() => copyResult(skill.name, runResult.ok ? JSON.stringify(runResult.result, null, 2) : `Error: ${runResult.error}`)}
+                          title="Copy output"
+                          className="absolute top-1 right-1 flex items-center gap-1 rounded px-1.5 py-0.5 text-[9px] bg-black/40 text-white/40 hover:text-[#00f2ff] transition-colors"
+                        >
+                          {copiedSkill === skill.name ? <><Check size={10} className="text-green-400" /><span className="text-green-400">copied</span></> : <><Copy size={10} /><span>copy</span></>}
+                        </button>
                       </div>
                     )}
                   </div>
