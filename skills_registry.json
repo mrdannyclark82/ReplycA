@@ -1,0 +1,279 @@
+{
+  "skill_forge": {
+    "name": "skill_forge",
+    "description": "Generate and install a new skill from a plain-English description",
+    "version": "1.0.0",
+    "author": "M.I.L.L.A.",
+    "commands": [
+      "/forge",
+      "/makeskill"
+    ],
+    "requires": [],
+    "origin": "core_os/skills/skill_skill_forge.py",
+    "enabled": true
+  },
+  "daily_quote": {
+    "name": "daily_quote",
+    "description": "Returns a random motivational quote from a curated collection",
+    "version": "1.0.0",
+    "author": "M.I.L.L.A.",
+    "commands": [
+      "/daily_quote"
+    ],
+    "requires": [],
+    "origin": "/home/nexus/ogdray/core_os/skills/skill_daily_quote.py",
+    "enabled": true
+  },
+  "sota_ui_guru": {
+    "name": "sota_ui_guru",
+    "description": "Expert guide on State-of-the-Art UI Design principles, trends, and implementation patterns for 2024-2025.",
+    "version": "1.0.0",
+    "author": "M.I.L.L.A.",
+    "commands": [
+      "/sota-ui",
+      "/ui-design"
+    ],
+    "requires": [],
+    "origin": "/home/nexus/ogdray/core_os/skills/skill_sota_ui_guru.py",
+    "enabled": true
+  },
+  "audio_intelligence": {
+    "name": "audio_intelligence",
+    "description": "Process and analyze audio files using Gemini AI",
+    "version": "1.0.0",
+    "author": "M.I.L.L.A.",
+    "commands": [
+      "/audio"
+    ],
+    "requires": [],
+    "origin": "/home/nexus/ogdray/core_os/skills/audio_intelligence.py",
+    "enabled": true
+  },
+  "code_analyze": {
+    "name": "code_analyze",
+    "description": "Static code analysis and review using the active AI model",
+    "version": "1.0.0",
+    "author": "M.I.L.L.A.",
+    "commands": [
+      "/analyze"
+    ],
+    "requires": [],
+    "origin": "/home/nexus/ogdray/core_os/skills/code_analyze.py",
+    "enabled": true
+  },
+  "computer_macro": {
+    "name": "computer_macro",
+    "description": "Record and replay keyboard/mouse macros for desktop automation",
+    "version": "1.0.0",
+    "author": "M.I.L.L.A.",
+    "commands": [
+      "/macro",
+      "/replay"
+    ],
+    "requires": [],
+    "origin": "/home/nexus/ogdray/core_os/skills/computer_macro.py",
+    "enabled": true
+  },
+  "computer_use": {
+    "name": "computer_use",
+    "description": "Playwright-based browser and desktop automation primitives",
+    "version": "1.0.0",
+    "author": "M.I.L.L.A.",
+    "commands": [
+      "/browse",
+      "/click"
+    ],
+    "requires": [],
+    "origin": "/home/nexus/ogdray/core_os/skills/computer_use.py",
+    "enabled": true
+  },
+  "computer_use_agent": {
+    "name": "computer_use_agent",
+    "description": "Autonomous computer use agent \u2014 navigate and interact with desktop GUIs",
+    "version": "1.0.0",
+    "author": "M.I.L.L.A.",
+    "commands": [
+      "/use",
+      "/agent-use"
+    ],
+    "requires": [],
+    "origin": "/home/nexus/ogdray/core_os/skills/computer_use_agent.py",
+    "enabled": true
+  },
+  "control_plane": {
+    "name": "control_plane",
+    "description": "System control plane \u2014 manage services, processes and runtime state",
+    "version": "1.0.0",
+    "author": "M.I.L.L.A.",
+    "commands": [
+      "/control",
+      "/sysctl"
+    ],
+    "requires": [],
+    "origin": "/home/nexus/ogdray/core_os/skills/control_plane.py",
+    "enabled": true
+  },
+  "docker_sandbox": {
+    "name": "docker_sandbox",
+    "description": "Execute shell commands inside a Docker sandbox for safe code running",
+    "version": "1.0.0",
+    "author": "M.I.L.L.A.",
+    "commands": [
+      "/bash",
+      "/sandbox"
+    ],
+    "requires": [],
+    "origin": "/home/nexus/ogdray/core_os/skills/docker_sandbox.py",
+    "enabled": true
+  },
+  "dynamic_features": {
+    "name": "dynamic_features",
+    "description": "Auto-generated dynamic feature extensions extracted from main agent loop",
+    "version": "1.0.0",
+    "author": "M.I.L.L.A.",
+    "commands": [],
+    "requires": [],
+    "origin": "/home/nexus/ogdray/core_os/skills/dynamic_features.py",
+    "enabled": true
+  },
+  "google_calendar": {
+    "name": "google_calendar",
+    "description": "Read and write Google Calendar events via OAuth",
+    "version": "1.0.0",
+    "author": "M.I.L.L.A.",
+    "commands": [
+      "/gcal",
+      "/calendar"
+    ],
+    "requires": [],
+    "origin": "/home/nexus/ogdray/core_os/skills/google_calendar.py",
+    "enabled": true
+  },
+  "grok_master": {
+    "name": "grok_master",
+    "description": "xAI Grok orchestrator for high-intelligence reasoning tasks",
+    "version": "1.0.0",
+    "author": "M.I.L.L.A.",
+    "commands": [
+      "/grok"
+    ],
+    "requires": [],
+    "origin": "/home/nexus/ogdray/core_os/skills/grok_master.py",
+    "enabled": true
+  },
+  "local_calendar": {
+    "name": "local_calendar",
+    "description": "Manage a local JSON-based event schedule without cloud dependency",
+    "version": "1.0.0",
+    "author": "M.I.L.L.A.",
+    "commands": [
+      "/cal",
+      "/schedule"
+    ],
+    "requires": [],
+    "origin": "/home/nexus/ogdray/core_os/skills/local_calendar.py",
+    "enabled": true
+  },
+  "millAlyzer": {
+    "name": "millAlyzer",
+    "description": "Fetch YouTube transcripts and extract code, commands, and key insights",
+    "version": "1.0.0",
+    "author": "M.I.L.L.A.",
+    "commands": [
+      "/analyze-video",
+      "/millalyze"
+    ],
+    "requires": [],
+    "origin": "/home/nexus/ogdray/core_os/skills/millAlyzer.py",
+    "enabled": true
+  },
+  "milla_vision": {
+    "name": "milla_vision",
+    "description": "On-device vision analysis \u2014 image description and visual memory context",
+    "version": "1.0.0",
+    "author": "M.I.L.L.A.",
+    "commands": [
+      "/vision",
+      "/describe"
+    ],
+    "requires": [],
+    "origin": "/home/nexus/ogdray/core_os/skills/milla_vision.py",
+    "enabled": true
+  },
+  "scout": {
+    "name": "scout",
+    "description": "Scan the system for inefficiencies, clutter, and risk patterns",
+    "version": "1.0.0",
+    "author": "M.I.L.L.A.",
+    "commands": [
+      "/scan",
+      "/scout"
+    ],
+    "requires": [],
+    "origin": "/home/nexus/ogdray/core_os/skills/scout.py",
+    "enabled": true
+  },
+  "test_skill": {
+    "name": "test_skill",
+    "description": "A simple skill to test functionality and execution.",
+    "version": "1.0.0",
+    "author": "M.I.L.L.A.",
+    "commands": [
+      "/test"
+    ],
+    "requires": [],
+    "origin": "/home/nexus/ogdray/core_os/skills/skill_test_skill.py",
+    "enabled": true
+  },
+  "ui_design_assist": {
+    "name": "ui_design_assist",
+    "description": "Provides assistance with front-end UI/UX design tasks, including color palette generation, font suggestions, and layout ideas.",
+    "version": "1.0.0",
+    "author": "M.I.L.L.A.",
+    "commands": [
+      "/design"
+    ],
+    "requires": [],
+    "origin": "/home/nexus/ogdray/core_os/skills/skill_ui_design_assist.py",
+    "enabled": true
+  },
+  "soul_guard": {
+    "name": "soul_guard",
+    "description": "Persona integrity guardian \u2014 resets Milla to her true identity if drift detected",
+    "version": "1.0.0",
+    "author": "M.I.L.L.A.",
+    "commands": [
+      "/soul-sync"
+    ],
+    "requires": [],
+    "origin": "/home/nexus/ogdray/core_os/skills/soul_guard.py",
+    "enabled": true
+  },
+  "sre_tools": {
+    "name": "sre_tools",
+    "description": "Site reliability tools \u2014 system logs, package status, service health on Arch Linux",
+    "version": "1.0.0",
+    "author": "M.I.L.L.A.",
+    "commands": [
+      "/sre",
+      "/logs",
+      "/pkg"
+    ],
+    "requires": [],
+    "origin": "/home/nexus/ogdray/core_os/skills/sre_tools.py",
+    "enabled": true
+  },
+  "youtube_skill": {
+    "name": "youtube_skill",
+    "description": "YouTube Data API integration for search, channel, and video metadata",
+    "version": "1.0.0",
+    "author": "M.I.L.L.A.",
+    "commands": [
+      "/youtube",
+      "/yt"
+    ],
+    "requires": [],
+    "origin": "/home/nexus/ogdray/core_os/skills/youtube_skill.py",
+    "enabled": true
+  }
+}
