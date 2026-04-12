@@ -49,6 +49,31 @@ const Chat: React.FC = () => {
   const inputRef   = useRef<HTMLInputElement>(null);
   const recorderRef = useRef<MediaRecorder | null>(null);
   const chunksRef   = useRef<Blob[]>([]);
+  const lastSyncTimestamp = useRef<number>(Date.now());
+
+  // ── Quantum Sync Loop ──────────────────────────────────────────────────────
+  useEffect(() => {
+    const quantumSync = async () => {
+      try {
+        const res = await axios.get(`/api/quantum/sync?since=${lastSyncTimestamp.current}`);
+        if (res.data.success && res.data.thoughts.length > 0) {
+          console.log(`[QuantumSync] Entangled ${res.data.thoughts.length} thoughts`);
+          const newMsgs: Message[] = [];
+          res.data.thoughts.forEach((t: any) => {
+            newMsgs.push({ role: 'user', content: t.userMessage });
+            newMsgs.push({ role: 'assistant', content: t.assistantResponse });
+          });
+          setMessages(prev => [...prev, ...newMsgs]);
+          lastSyncTimestamp.current = res.data.timestamp;
+        }
+      } catch (err) {
+        console.warn('[QuantumSync] Entanglement failed', err);
+      }
+    };
+
+    const interval = setInterval(quantumSync, 30000); // Entangle every 30s
+    return () => clearInterval(interval);
+  }, []);
 
   // ── Compute suggestions + ghost text whenever input changes ───────────────
   useEffect(() => {

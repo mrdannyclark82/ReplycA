@@ -13,8 +13,16 @@
 - [x] Implement a streamlined CLI loop for commands (`/scan`, `/fix`, `/switch-model`, `/status`).
 - [x] Integrate with `core_os/milla_nexus.py` for pulse/monitoring.
 - [x] Ensure all key actions (shell, GIM, memory) are accessible through a single, clean prompt.
+- [x] **Axiom-Rayne Fresh UI Build**: Implement Hemi-Console, Neural Orb Mic, and Telemetry Bar on Android.
 
-## Phase 3: Verification & Burn-In
+## Phase 3: Core System Stabilization & Modularization
+- [x] Modularize "Frankensteined" features (`gmail`, `web_ui`, `voice`, `swarm`, `consensus`) into `core_os/skills/`.
+- [x] Migrate `core_os/memory_core.py` to `core_os/memory/agent_memory.py`.
+- [x] Update skill imports in modularized files to reflect new memory architecture.
+- [x] Stabilize root-level `core_os` by mirroring memory logic from `ogdray`.
+- [x] Verify system runtime stability (Successful import test of all modularized skills).
+
+## Phase 4: Final Verification & Burn-In
 - [x] Test under load using `stress-ng` (Confirmed 23GB RAM stability).
 - [x] Verify no "mocking" in the primary interface (VLA dispatcher integrated, headless logic clarified).
 - [x] Finalize the "Nexus Master Console" as the main entry point (Created milla_shortcuts/nexus.sh).

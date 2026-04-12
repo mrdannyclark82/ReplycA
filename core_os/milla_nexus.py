@@ -128,7 +128,9 @@ def nexus_pulse():
     
     if r:
         try:
-            r.set("milla:neuro_state", json.dumps(state))
+            state_json = json.dumps(state)
+            r.set("milla:neuro_state", state_json)
+            r.publish("milla:quantum_pulse", state_json) # Broadcast to all cabins
         except: pass
     
     with open(str(NEURO_FILE), 'w') as f:
@@ -185,4 +187,4 @@ if __name__ == "__main__":
             nexus_pulse()
         except Exception as e:
             print(f"[!] Nexus Error: {e}")
-        time.sleep(600)
+        time.sleep(10)

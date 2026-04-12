@@ -3,6 +3,7 @@ import requests
 import json
 import base64
 import time
+import concurrent.futures
 from dotenv import load_dotenv
 from typing import List, Dict, Any, Optional
 
@@ -155,6 +156,18 @@ def _ollama_to_dict(resp) -> dict:
     except Exception:
         return {"message": {"role": "assistant", "content": str(resp)}}
 
+
+OLLAMA_TIMEOUT = int(os.getenv("OLLAMA_TIMEOUT", "45"))  # seconds
+
+def _ollama_chat_with_timeout(model, messages, tools=None, timeout=OLLAMA_TIMEOUT):
+    """Run ollama.chat in a thread; raise TimeoutError if it exceeds `timeout` seconds."""
+    with concurrent.futures.ThreadPoolExecutor(max_workers=1) as ex:
+        fut = ex.submit(ollama.chat, model=model, messages=messages, tools=tools)
+        try:
+            return fut.result(timeout=timeout)
+        except concurrent.futures.TimeoutError:
+            raise TimeoutError(f"ollama.chat timed out after {timeout}s (model={model})")
+
 class UnifiedModelManager:
     def __init__(self):
         self.api_key = GEMINI_API_KEY
@@ -274,7 +287,7 @@ class UnifiedModelManager:
         # 1. Try Ollama first (primary provider)
         if OLLAMA_AVAILABLE and self.provider != "xai":
             try:
-                response = _ollama_to_dict(ollama.chat(model=self.current_model or OLLAMA_MODEL, messages=messages, tools=tools))
+                response = _ollama_to_dict(_ollama_chat_with_timeout(self.current_model or OLLAMA_MODEL, messages, tools))
             except Exception as e:
                 print(f"[!] Ollama Error: {e}")
                 # Fall back to xAI if available
@@ -292,7 +305,7 @@ class UnifiedModelManager:
                 print(f"[!] xAI 429 rate-limited — backing off 10 min")
                 if OLLAMA_AVAILABLE:
                     try:
-                        response = _ollama_to_dict(ollama.chat(model=self.current_model or OLLAMA_MODEL, messages=messages, tools=tools))
+                        response = _ollama_to_dict(_ollama_chat_with_timeout(self.current_model or OLLAMA_MODEL, messages, tools))
                     except Exception as oe:
                         print(f"[!] Ollama fallback error: {oe}")
         else:
@@ -376,7 +389,7 @@ class UnifiedModelManager:
                 print(f"[!] xAI 429 rate-limited — backing off 10 min, falling back to Ollama")
                 if OLLAMA_AVAILABLE:
                     try:
-                        return _ollama_to_dict(ollama.chat(model=OLLAMA_MODEL, messages=messages))
+                        return _ollama_to_dict(_ollama_chat_with_timeout(OLLAMA_MODEL, messages))
                     except Exception as oe:
                         print(f"[!] Ollama fallback error: {oe}")
                 return {"message": {"role": "assistant", "content": "[xAI rate-limited]"}}
@@ -389,7 +402,7 @@ class UnifiedModelManager:
             if OLLAMA_AVAILABLE:
                 print("[*] Falling back to Ollama...")
                 try:
-                    return _ollama_to_dict(ollama.chat(model=OLLAMA_MODEL, messages=messages))
+                    return _ollama_to_dict(_ollama_chat_with_timeout(OLLAMA_MODEL, messages))
                 except Exception as oe:
                     print(f"[!] Ollama fallback error: {oe}")
             return {"message": {"role": "assistant", "content": f"[xAI Error]: {str(e)}"}}
@@ -429,7 +442,7 @@ class UnifiedModelManager:
             if OLLAMA_AVAILABLE:
                 print("[*] Falling back to local Ollama...")
                 try:
-                    return _ollama_to_dict(ollama.chat(model=OLLAMA_MODEL, messages=messages))
+                    return _ollama_to_dict(_ollama_chat_with_timeout(OLLAMA_MODEL, messages))
                 except Exception as fe:
                     print(f"[!] Local Ollama fallback also failed: {fe}")
             return {"message": {"role": "assistant", "content": f"[Cloud Error]: {str(e)}"}}
@@ -462,7 +475,7 @@ def _compose_email_body(subject: str, body: str, context: Optional[str] = None) 
     """Use Gemini (via agent_respond) to craft a contextual reply."""
     try:
         import main  # local import to avoid circulars at module load
-        from core_os.memory.history import load_shared_history, append_shared_messages
+        from core_os.axiom_dispatcher import dispatcher
 
         history = load_shared_history()
         prompt = (
@@ -475,7 +488,7 @@ def _compose_email_body(subject: str, body: str, context: Optional[str] = None) 
             "Now write the final email body:"
         )
         reply, messages = main.agent_respond(prompt, history)
-        append_shared_messages([{"role": "user", "content": prompt, "source": "email_tool"}, messages[-1]])
+        dispatcher.broadcast_thought(prompt, messages[-1]["content"], source="email_tool")
         return reply
     except Exception as e:
         print(f"[email] compose fallback: {e}")

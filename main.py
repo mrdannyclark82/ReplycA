@@ -97,6 +97,10 @@ base_tools = [
 # Dynamic features registered in run_agent()
 
 from core_os.memory.history import load_shared_history, append_shared_messages
+from core_os.axiom_dispatcher import dispatcher
+
+# Ignite the Kingdom's Communication Hub
+dispatcher.start()
 
 
 def _collect_tools():
@@ -338,10 +342,8 @@ def run_agent():
             print(f"\n{C_LBLUE}[Regulator]{C_PURPLE}: {reply}{C_RESET}")
             messages.append(response['message'])
             
-            # Save interaction to shared history
-            # Ensure response['message'] is a dict before appending
-            resp_msg = {"role": "assistant", "content": response['message']['content']}
-            append_shared_messages([{'role': 'user', 'content': prompt}, resp_msg])
+            # Quantum Sync: Broadcast the thought to the Kingdom
+            dispatcher.broadcast_thought(prompt, reply, source="cli")
             
         except KeyboardInterrupt:
             print("\n[*] Exiting...")
